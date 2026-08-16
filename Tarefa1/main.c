@@ -129,12 +129,16 @@ double MedirLinhas(
     const double *vetor_entrada,
     double *vetor_saida,
     size_t quantidade_linhas,
-    size_t quantidade_colunas)
+    size_t quantidade_colunas,
+    size_t repeticoes)
 {
     double tempo_inicio = ObterTempoAtual();
 
-    MultiplicarPorLinhas(
-        matriz, vetor_entrada, vetor_saida, quantidade_linhas, quantidade_colunas);
+    for (size_t i = 0; i < repeticoes; ++i)
+    {
+        MultiplicarPorLinhas(
+            matriz, vetor_entrada, vetor_saida, quantidade_linhas, quantidade_colunas);
+    }
 
     double tempo_fim = ObterTempoAtual();
     return tempo_fim - tempo_inicio;
@@ -145,19 +149,23 @@ double MedirColunas(
     const double *vetor_entrada,
     double *vetor_saida,
     size_t quantidade_linhas,
-    size_t quantidade_colunas)
+    size_t quantidade_colunas,
+    size_t repeticoes)
 {
     double tempo_inicio = ObterTempoAtual();
 
-    MultiplicarPorColunas(
-        matriz, vetor_entrada, vetor_saida, quantidade_linhas, quantidade_colunas);
+    for (size_t i = 0; i < repeticoes; ++i)
+    {
+        MultiplicarPorColunas(
+            matriz, vetor_entrada, vetor_saida, quantidade_linhas, quantidade_colunas);
+    }
 
     double tempo_fim = ObterTempoAtual();
     return tempo_fim - tempo_inicio;
 }
 
 /* Executa um teste para uma matriz quadrada n x n. */
-void ExecutarTeste(size_t tamanho_matriz, FILE *arquivo_saida)
+void ExecutarTeste(size_t repeticoes, size_t tamanho_matriz, FILE *arquivo_saida)
 {
     double *matriz = AlocarMatriz(tamanho_matriz, tamanho_matriz);
     double *vetor_entrada = AlocarVetor(tamanho_matriz);
@@ -168,16 +176,16 @@ void ExecutarTeste(size_t tamanho_matriz, FILE *arquivo_saida)
     InicializarVetor(vetor_entrada, tamanho_matriz);
 
     double tempo_linhas = MedirLinhas(
-        matriz, vetor_entrada, vetor_saida_linhas, tamanho_matriz, tamanho_matriz);
+        matriz, vetor_entrada, vetor_saida_linhas, tamanho_matriz, tamanho_matriz, repeticoes);
 
     double tempo_colunas = MedirColunas(
-        matriz, vetor_entrada, vetor_saida_colunas, tamanho_matriz, tamanho_matriz);
+        matriz, vetor_entrada, vetor_saida_colunas, tamanho_matriz, tamanho_matriz, repeticoes);
 
     double erro_maximo = CalcularErroMaximo(
         vetor_saida_linhas, vetor_saida_colunas, tamanho_matriz);
 
-    fprintf(arquivo_saida, "%zu,%.12f,%.12f,%.12e\n",
-            tamanho_matriz, tempo_linhas, tempo_colunas, erro_maximo);
+    fprintf(arquivo_saida, "%zu,%zu,%.12f,%.12f,%.12e\n",
+            tamanho_matriz, repeticoes, tempo_linhas, tempo_colunas, erro_maximo);
 
     printf("N=%zu | linhas=%.6f s | colunas=%.6f s | erro=%.3e\n",
            tamanho_matriz, tempo_linhas, tempo_colunas, erro_maximo);
@@ -196,26 +204,40 @@ int main(void)
         sizeof(tamanhos_matriz) / sizeof(tamanhos_matriz[0]);
 
     // arquivo pra plotar gráficos com python depois pro relatório
-    FILE *arquivo_saida = fopen("resultados_mxv.csv", "w");
+    FILE *arquivo_saida = fopen("resultados.csv", "w");
     if (arquivo_saida == NULL)
     {
-        fprintf(stderr, "Erro ao criar resultados_mxv.csv.\n");
+        fprintf(stderr, "Erro ao criar resultados.csv.\n");
         return EXIT_FAILURE;
     }
 
     fprintf(arquivo_saida,
-            "tamanho,tempo_linhas_s,tempo_colunas_s,erro_maximo\n");
+            "tamanho,repeticoes,tempo_linhas_s,tempo_colunas_s,erro_maximo\n");
 
     for (size_t indice_tamanho = 0; indice_tamanho < quantidade_tamanhos; ++indice_tamanho)
     {
-        size_t tamanho_matriz = tamanhos_matriz[indice_tamanho];
+        size_t n = tamanhos_matriz[indice_tamanho];
 
-        ExecutarTeste(tamanho_matriz, arquivo_saida);
+        int repeticoes;
+        if (n <= 500)
+        {
+            repeticoes = 100;
+        }
+        else if (n <= 1500)
+        {
+            repeticoes = 20;
+        }
+        else
+        {
+            repeticoes = 5;
+        }
+
+        ExecutarTeste(repeticoes, n, arquivo_saida);
     }
 
     fclose(arquivo_saida);
 
-    printf("\nResultados salvos em resultados_mxv.csv\n");
+    printf("\nResultados salvos em resultados.csv\n");
 
     return EXIT_SUCCESS;
 }
