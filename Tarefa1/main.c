@@ -1,11 +1,19 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 double ObterTempoAtual(void)
 {
-    return (double)clock() / CLOCKS_PER_SEC;
+    struct timespec tempo;
+
+    clock_gettime(CLOCK_MONOTONIC, &tempo);
+
+    return (double)tempo.tv_sec +
+           (double)tempo.tv_nsec / 1e9;
 }
+
 
 double *AlocarMatriz(size_t quantidade_linhas, size_t quantidade_colunas)
 {
