@@ -1,0 +1,161 @@
+# Tarefa 3
+
+Akira Vitor de Lima Yamazaki - 20240021764
+
+## Código 1 - cont1.c
+
+Como os processos são uma "cópia" do código pai rodando separadamente, com sua própria memória, todos iniciam com o `contador = 0`. Dessa forma, cada um realiza sua própria soma até que `contador = 1000000`, e, ao retornar, o pai ainda terá `contador = 0`.
+
+Caso esse seja o resultado esperado, o código está correto, porém caso a intenção seja somar todos em contador, poderiamos usar semáforos para acessar uma memória compartilhada entre os filhos, que poderia ser acessada pelo pai também.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/mman.h>
+#include <semaphore.h>
+
+#define NUM_PROCESSOS 4
+#define INCREMENTOS 1000000
+
+int main()
+{
+    int *contador = mmap(NULL, sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    if (contador == MAP_FAILED)
+    {
+        perror("Erro ao criar memória compartilhada");
+        exit(EXIT_FAILURE);
+    }
+    *contador = 0;
+
+    // semáforo compartilhado entre processos
+    sem_t *sem = mmap(NULL, sizeof(sem_t), PROT_READ | PROT_WRITE,
+                      MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    if (sem == MAP_FAILED)
+    {
+        perror("Erro ao criar semáforo");
+        exit(EXIT_FAILURE);
+    }
+    sem_init(sem, 1, 1);
+
+    printf("Contador inicial: %d\n", *contador);
+
+    for (int i = 0; i < NUM_PROCESSOS; i++)
+    {
+        pid_t pid = fork();
+        if (pid < 0)
+        {
+            perror("Erro ao criar processo");
+            exit(EXIT_FAILURE);
+        }
+        if (pid == 0)
+        {
+            // Código executado pelo processo filho
+            for (int j = 0; j < INCREMENTOS; j++)
+            {
+                sem_wait(sem); // trava
+                (*contador)++;
+                sem_post(sem); // destrava
+            }
+            printf("Filho %d terminou\n", getpid());
+            exit(EXIT_SUCCESS);
+        }
+    }
+
+    // Processo pai espera todos os filhos
+    for (int i = 0; i < NUM_PROCESSOS; i++)
+    {
+        wait(NULL);
+    }
+
+    printf("\nContador no processo pai: %d\n", *contador);
+
+    // Limpeza
+    sem_destroy(sem);
+    munmap(contador, sizeof(int));
+    munmap(sem, sizeof(sem_t));
+
+    return 0;
+}
+```
+
+## Código 2 - cont2.c
+
+Esse código apresenta um problema de região crítica no acesso à variável contador.
+
+```c
+int contador = 0;
+void *incrementar(void *arg)
+{
+    for (int i = 0; i < INCREMENTOS; i++)
+    {
+        contador++;
+    }
+    return NULL;
+}
+
+// [...]
+int erro = pthread_create(
+            &threads[i],
+            NULL,
+            incrementar,
+            NULL);
+// [...]
+```
+
+Como todas as threads atuam ao mesmo tempo, todas recebem o mesmo valor de contador antes de realizarem sua ação (nesse caso, `contador++`). Assim, caso fiquem todas alinhadas no tempo, contador finalizaria com o valor 1000000, porém na realidade acontecem pequenas variações onde threads finalizam antes das outras iniciarem, fazendo o código terminar com um valor aleatoriamente maior.
+
+Para corrigir poderíamos alterar o programa para permitir acesso à variável uma thread por vez usando mutex, "travando" a variável antes e destravando depois na função `incrementar`.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+#define NUM_THREADS 4
+#define INCREMENTOS 1000000
+
+int contador = 0;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void *incrementar(void *arg)
+{
+    for (int i = 0; i < INCREMENTOS; i++)
+    {
+        pthread_mutex_lock(&mutex);
+        contador++;
+        pthread_mutex_unlock(&mutex);
+    }
+    return NULL;
+}
+
+int main()
+{
+    pthread_t threads[NUM_THREADS];
+    printf("Contador inicial: %d\n", contador);
+    // Criar as threads
+    for (int i = 0; i < NUM_THREADS; i++)
+    {
+        int erro = pthread_create(
+            &threads[i],
+            NULL,
+            incrementar,
+            NULL);
+        if (erro != 0)
+        {
+            fprintf(stderr, "Erro ao criar thread\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+    // Esperar todas as threads
+    for (int i = 0; i < NUM_THREADS; i++)
+    {
+        pthread_join(threads[i], NULL);
+    }
+    printf("\nContador final: %d\n", contador);
+
+    pthread_mutex_destroy(&mutex);
+    return 0;
+}
+```
