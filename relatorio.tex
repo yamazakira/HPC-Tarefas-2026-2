@@ -1,0 +1,81 @@
+\documentclass[12pt, openright, oneside, a4paper, brazil]{article}
+
+% Pacotes básicos
+\usepackage[utf8]{inputenc}
+\usepackage[left=3cm,top=3cm,right=2cm,bottom=2cm]{geometry}
+\usepackage{setspace}
+\setlength\parindent{1.25cm}
+\usepackage{graphicx}
+
+\begin{document}
+	
+	\begin{center}
+		\thispagestyle{empty}
+		\textbf{\uppercase{Universidade Federal do Rio Grande do Norte}}\\
+		\textbf{\uppercase{Bacharelado em Tecnologia da Informação}}\\
+		\vspace{4cm}
+		AKIRA VITOR DE LIMA YAMAZAKI\\
+		\vspace{5cm}
+		\textbf{RELATÓRIO DA UNIDADE 1}\\
+		Computação de Alta Performance\\
+		\vspace{11cm}
+		NATAL, RN\\
+		2026\\
+	\end{center}
+	
+	\newpage
+		\onehalfspacing
+		\section{TAREFA 1}
+		\subsection{Contexto}
+		\par{Implementar duas versões da multiplicação de
+		matriz por vetor (MxV) em C, uma com acesso à matriz por linhas (linha externa, coluna interna) e outra por colunas (coluna externa, linha interna). Gravar os tempos de execução de cada versão para diferentes tamanhos de matriz, depois identificar quando os tempos passam a divergir e explicar o motivo disso acontecer.}
+		\subsection{Resultados}
+		\includegraphics{Code/HPC-Tarefas-2026-2/Graficos/grafico_1}\\
+		\par{O gŕafico acima mostra a evolução do tempo de execução de cada método utilizado para essa implementação para matrizes quadradas NxN. Analizando os dados coletados podemos verificar que os tempos de execução permanecem muito próximos para matrizes quadradas com N = 10000, porém rapidamente é percebida uma performance significativamente melhor para o método de acesso por linhas.}
+		\par{Esse comportamento se dá pela forma que a linguagem C acessa e armazena dados de matrizes na memória cache. Esse acesso ocorre de forma sequencial, linha por linha. Ou seja, para obter determinado dado em uma matriz a linha completa é salva e percorrida para procurar o dado. Esse comportamento não afeta o método de multiplicação linha por linha, visto que é o comportamento esperado dele: salva a linha, pesquisa o item e já utiliza na multiplicação.}
+		\par{Porém, para implementação de coluna por coluna, isso se torna um grande problema para matrizes com linhas muito grandes, pois para cada coluna, mesmo que para obter apenas um item, precisa salvar a linha completa. Ou seja, enquanto o método de linhas precisa salvar a apenas uma vez para buscar o último item da linha, essa versão precisa salvar N linhas para obter o item N dessa coluna.}
+	
+	\newpage
+		\onehalfspacing
+		\section{TAREFA 2}
+		\par{Teste}
+		\subsection{Gráficos}
+		\subsection{Códigos}
+	
+	\newpage
+		\onehalfspacing
+		\section{TAREFA 3}
+		\par{Teste}
+		\subsection{Gráficos}
+		\subsection{Códigos}
+	
+	\newpage
+		\onehalfspacing
+		\section{TAREFA 4}
+		\par{Teste}
+		\subsection{Gráficos}
+		\subsection{Códigos}
+		
+	\newpage
+		\onehalfspacing
+		\section{TAREFA 5}
+		\par{Teste}
+		\subsection{Gráficos}
+		\subsection{Códigos}
+	
+	\newpage
+		\onehalfspacing
+		\section{TAREFA 6}
+		\par{Teste}
+		\subsection{Gráficos}
+		\subsection{Códigos}
+	
+	\newpage
+		\onehalfspacing
+		\section{TAREFA 7}
+		\par{Teste}
+		\subsection{Gráficos}
+		\subsection{Códigos}
+	
+	
+\end{document}
