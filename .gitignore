@@ -61,6 +61,5 @@ dkms.conf
 **/resultados.csv
 **/resultados*.csv
 
-**/Graficos/
 
 **/*.mkd
