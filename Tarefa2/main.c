@@ -28,7 +28,9 @@ double *criar_vetor(size_t tamanho) {
   return vetor;
 }
 
-void liberar_vetor(double *vetor) { free(vetor); }
+void liberar_vetor(double *vetor) {
+  free(vetor);
+}
 
 void inicializar_vetor(double *vetor, size_t tamanho) {
   for (size_t i = 0; i < tamanho; i++) {
@@ -100,7 +102,7 @@ double medir_soma_independente(const double *vetor, size_t tamanho,
   return fim - inicio;
 }
 
-Resultado executar_testes(size_t tamanho) {
+Resultado executar_testes(size_t tamanho, FILE *arquivo) {
   Resultado resultado;
   double soma_dependente;
   double soma_independente;
@@ -115,31 +117,64 @@ Resultado executar_testes(size_t tamanho) {
   resultado.soma_independente =
       medir_soma_independente(vetor, tamanho, &soma_independente);
 
-  printf("%zu,%.9f,%.9f,%.9f,%.2f,%.2f\n", tamanho, resultado.inicializacao,
-         resultado.soma_dependente, resultado.soma_independente,
-         soma_dependente, soma_independente);
+  printf("%zu,%.9f,%.9f,%.9f,%.2f,%.2f\n",
+         tamanho,
+         resultado.inicializacao,
+         resultado.soma_dependente,
+         resultado.soma_independente,
+         soma_dependente,
+         soma_independente);
+
+  fprintf(arquivo, "%zu,%.9f,%.9f,%.9f,%.2f,%.2f\n",
+          tamanho,
+          resultado.inicializacao,
+          resultado.soma_dependente,
+          resultado.soma_independente,
+          soma_dependente,
+          soma_independente);
 
   liberar_vetor(vetor);
 
   return resultado;
 }
 
-void executar_tamanhos(const size_t *tamanhos, size_t quantidade) {
+void executar_tamanhos(const size_t *tamanhos, size_t quantidade,
+                       FILE *arquivo) {
   for (size_t i = 0; i < quantidade; i++) {
-    executar_testes(tamanhos[i]);
+    executar_testes(tamanhos[i], arquivo);
   }
 }
 
 int main(void) {
-  const size_t tamanhos[] = {1000, 10000, 100000, 1000000, 10000000, 100000000};
+  const size_t tamanhos[] = {
+      1000,
+      10000,
+      100000,
+      1000000,
+      10000000,
+      100000000
+  };
 
   size_t quantidade = sizeof(tamanhos) / sizeof(tamanhos[0]);
 
-  printf("tamanho,inicializacao,soma_dependente,"
-         "soma_independente,resultado_dependente,"
-         "resultado_independente\n");
+  FILE *arquivo = fopen("resultadosO3.csv", "w");
 
-  executar_tamanhos(tamanhos, quantidade);
+  if (arquivo == NULL) {
+    fprintf(stderr, "Erro ao criar arquivo CSV\n");
+    return EXIT_FAILURE;
+  }
+
+  const char *cabecalho =
+      "tamanho,inicializacao,soma_dependente,"
+      "soma_independente,resultado_dependente,"
+      "resultado_independente\n";
+
+  printf("%s", cabecalho);
+  fprintf(arquivo, "%s", cabecalho);
+
+  executar_tamanhos(tamanhos, quantidade, arquivo);
+
+  fclose(arquivo);
 
   return 0;
 }

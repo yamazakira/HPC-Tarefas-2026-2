@@ -1,3 +1,4 @@
+// main.c
 #include <omp.h>
 #include <stdbool.h>
 #include <stdio.h>
