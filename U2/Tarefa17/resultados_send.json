@@ -1,0 +1,31 @@
+{
+  "modo": "send",
+  "funcao": "MPI_Send",
+  "no_processo_0": "fedora",
+  "no_processo_1": "fedora",
+  "comunicacao": "intra-no",
+  "resultados": [
+    {"bytes": 8, "repeticoes": 1000, "tempo_total_s": 0.001094888, "tempo_ida_volta_us": 1.0949, "latencia_us": 0.5474, "banda_mbs": 14.6134, "valido": true},
+    {"bytes": 16, "repeticoes": 1000, "tempo_total_s": 0.001036142, "tempo_ida_volta_us": 1.0361, "latencia_us": 0.5181, "banda_mbs": 30.8838, "valido": true},
+    {"bytes": 32, "repeticoes": 1000, "tempo_total_s": 0.000972015, "tempo_ida_volta_us": 0.9720, "latencia_us": 0.4860, "banda_mbs": 65.8426, "valido": true},
+    {"bytes": 64, "repeticoes": 1000, "tempo_total_s": 0.001300180, "tempo_ida_volta_us": 1.3002, "latencia_us": 0.6501, "banda_mbs": 98.4479, "valido": true},
+    {"bytes": 128, "repeticoes": 1000, "tempo_total_s": 0.001147136, "tempo_ida_volta_us": 1.1471, "latencia_us": 0.5736, "banda_mbs": 223.1645, "valido": true},
+    {"bytes": 256, "repeticoes": 1000, "tempo_total_s": 0.000974235, "tempo_ida_volta_us": 0.9742, "latencia_us": 0.4871, "banda_mbs": 525.5406, "valido": true},
+    {"bytes": 512, "repeticoes": 1000, "tempo_total_s": 0.001044925, "tempo_ida_volta_us": 1.0449, "latencia_us": 0.5225, "banda_mbs": 979.9746, "valido": true},
+    {"bytes": 1024, "repeticoes": 1000, "tempo_total_s": 0.001201738, "tempo_ida_volta_us": 1.2017, "latencia_us": 0.6009, "banda_mbs": 1704.1984, "valido": true},
+    {"bytes": 2048, "repeticoes": 1000, "tempo_total_s": 0.001473001, "tempo_ida_volta_us": 1.4730, "latencia_us": 0.7365, "banda_mbs": 2780.7177, "valido": true},
+    {"bytes": 4096, "repeticoes": 1000, "tempo_total_s": 0.002195334, "tempo_ida_volta_us": 2.1953, "latencia_us": 1.0977, "banda_mbs": 3731.5506, "valido": true},
+    {"bytes": 8192, "repeticoes": 1000, "tempo_total_s": 0.003345587, "tempo_ida_volta_us": 3.3456, "latencia_us": 1.6728, "banda_mbs": 4897.1974, "valido": true},
+    {"bytes": 16384, "repeticoes": 1000, "tempo_total_s": 0.008312755, "tempo_ida_volta_us": 8.3128, "latencia_us": 4.1564, "banda_mbs": 3941.8941, "valido": true},
+    {"bytes": 32768, "repeticoes": 1000, "tempo_total_s": 0.009100657, "tempo_ida_volta_us": 9.1007, "latencia_us": 4.5503, "banda_mbs": 7201.2383, "valido": true},
+    {"bytes": 65536, "repeticoes": 1000, "tempo_total_s": 0.014047857, "tempo_ida_volta_us": 14.0479, "latencia_us": 7.0239, "banda_mbs": 9330.3911, "valido": true},
+    {"bytes": 131072, "repeticoes": 512, "tempo_total_s": 0.012166064, "tempo_ida_volta_us": 23.7618, "latencia_us": 11.8809, "banda_mbs": 11032.1406, "valido": true},
+    {"bytes": 262144, "repeticoes": 256, "tempo_total_s": 0.013083428, "tempo_ida_volta_us": 51.1071, "latencia_us": 25.5536, "banda_mbs": 10258.6056, "valido": true},
+    {"bytes": 524288, "repeticoes": 128, "tempo_total_s": 0.021684750, "tempo_ida_volta_us": 169.4121, "latencia_us": 84.7061, "banda_mbs": 6189.4985, "valido": true},
+    {"bytes": 1048576, "repeticoes": 64, "tempo_total_s": 0.036010470, "tempo_ida_volta_us": 562.6636, "latencia_us": 281.3318, "banda_mbs": 3727.1862, "valido": true},
+    {"bytes": 2097152, "repeticoes": 32, "tempo_total_s": 0.033811942, "tempo_ida_volta_us": 1056.6232, "latencia_us": 528.3116, "banda_mbs": 3969.5362, "valido": true},
+    {"bytes": 4194304, "repeticoes": 20, "tempo_total_s": 0.037896210, "tempo_ida_volta_us": 1894.8105, "latencia_us": 947.4052, "banda_mbs": 4427.1488, "valido": true},
+    {"bytes": 8388608, "repeticoes": 20, "tempo_total_s": 0.070421859, "tempo_ida_volta_us": 3521.0930, "latencia_us": 1760.5465, "banda_mbs": 4764.7751, "valido": true},
+    {"bytes": 16777216, "repeticoes": 20, "tempo_total_s": 0.171142237, "tempo_ida_volta_us": 8557.1119, "latencia_us": 4278.5559, "banda_mbs": 3921.2333, "valido": true}
+  ]
+}

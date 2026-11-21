@@ -1,0 +1,11 @@
+{
+  "processos": 4,
+  "nos": 1,
+  "repeticoes": 5,
+  "resultados": [
+    {"m": 1000, "n": 1000, "linhas_por_processo": 250, "tempo_scatter_s": 0.003869834, "tempo_bcast_s": 0.000789341, "tempo_calculo_s": 0.000653063, "tempo_gather_s": 0.000483105, "tempo_total_s": 0.004368867, "tempo_sequencial_s": 0.001459192, "speedup": 0.333998, "eficiencia": 0.083499, "speedup_calculo": 2.234382, "erro_max": 0},
+    {"m": 2000, "n": 2000, "linhas_por_processo": 500, "tempo_scatter_s": 0.014141030, "tempo_bcast_s": 0.003273761, "tempo_calculo_s": 0.002250943, "tempo_gather_s": 0.000343524, "tempo_total_s": 0.016160303, "tempo_sequencial_s": 0.005551936, "speedup": 0.343554, "eficiencia": 0.085888, "speedup_calculo": 2.466494, "erro_max": 0},
+    {"m": 4000, "n": 4000, "linhas_por_processo": 1000, "tempo_scatter_s": 0.092450294, "tempo_bcast_s": 0.015188684, "tempo_calculo_s": 0.010659341, "tempo_gather_s": 0.002592936, "tempo_total_s": 0.101389503, "tempo_sequencial_s": 0.021430671, "speedup": 0.211370, "eficiencia": 0.052842, "speedup_calculo": 2.010506, "erro_max": 0},
+    {"m": 8000, "n": 8000, "linhas_por_processo": 2000, "tempo_scatter_s": 0.392131900, "tempo_bcast_s": 0.110387128, "tempo_calculo_s": 0.043750802, "tempo_gather_s": 0.009821679, "tempo_total_s": 0.436962628, "tempo_sequencial_s": 0.085518570, "speedup": 0.195711, "eficiencia": 0.048928, "speedup_calculo": 1.954674, "erro_max": 0}
+  ]
+}

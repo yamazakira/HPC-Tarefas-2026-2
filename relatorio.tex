@@ -74,7 +74,7 @@
 		\par{Implementar duas versões da multiplicação de
 		matriz por vetor (MxV) em C, uma com acesso à matriz por linhas (linha externa, coluna interna) e outra por colunas (coluna externa, linha interna). Gravar os tempos de execução de cada versão para diferentes tamanhos de matriz, depois identificar quando os tempos passam a divergir e explicar o motivo disso acontecer.}
 		\subsection{\subtDois}
-		\includegraphics{Graficos/grafico_1}\\
+		\includegraphics{U1/Graficos/grafico_1}\\
 		\par{O gŕafico acima mostra a evolução do tempo de execução de cada método utilizado para essa implementação para matrizes quadradas NxN. Analizando os dados coletados podemos verificar que os tempos de execução permanecem muito próximos para matrizes quadradas com N = 10000, porém rapidamente é percebida uma performance significativamente melhor para o método de acesso por linhas.}
 		\par{Esse comportamento se dá pela forma que a linguagem C acessa e armazena dados de matrizes na memória cache. Esse acesso ocorre de forma sequencial, linha por linha. Ou seja, para obter determinado dado em uma matriz a linha completa é salva e percorrida para procurar o dado. Esse comportamento não afeta o método de multiplicação linha por linha, visto que é o comportamento esperado dele: salva a linha, pesquisa o item e já utiliza na multiplicação.}
 		\par{Porém, para implementação de coluna por coluna, isso se torna um grande problema para matrizes com linhas muito grandes, pois para cada coluna, mesmo que para obter apenas um item, precisa salvar a linha completa. Ou seja, enquanto o método de linhas precisa salvar a apenas uma vez para buscar o último item da linha, essa versão precisa salvar N linhas para obter o item N dessa coluna.}
@@ -337,9 +337,9 @@ int main(void)
 		\subsection{\subtUm}
 		\par{Implementar a soma dos itens de um vetor qualquer de forma cumulativa, de forma que exista dependência entres as iterações, usando variáveis auxiliares para quebrar essa dependência. Utilizar diferentes níveis de otimização e diferentes tamanhos do vetor para comparar a performance entre cada versão, analisando como as dependências afetam o desempenho e quais as otimizações executadas pelo compilador.}
 		\subsection{\subtDois}
-		\includegraphics{Tarefa2/inicializacao.png}\\
-		\includegraphics{Tarefa2/soma_dependente.png}\\
-		\includegraphics{Tarefa2/soma_independente.png}\\
+		\includegraphics{U1/Tarefa2/inicializacao.png}\\
+		\includegraphics{U1/Tarefa2/soma_dependente.png}\\
+		\includegraphics{U1/Tarefa2/soma_independente.png}\\
 		\par{Analisando os números obtidos, verificamos que a estrutura do código e as dependências têm influência direta em quanto o compilador consegue otimizar a execução.}
 		\par{A soma dependente tem uma cadeia de dependência entre suas iterações, limitando o paralelismo e fazendo com ue O2 e O3 tenham desempenho relativamente próximo ao de OO. Já a soma independente utiliza quatro acumuladores,  que elimina essa dependência e permite maior aproveitamento do paralelismo, tendo desempenho significativamente melhor.}
 		\par{As versões O2 e O3 também apresentaram melhora na inicialização do programa, além da soma independente. Porém esses ganhos não são ilimitados, pois o programa também é limitado pelo acesso a memória e performance geral da máquina usada nos testes, o que faz com que a performance quase equalize em certos pontos.}
@@ -737,7 +737,7 @@ int main(void)
 		\subsection{\subtDois}
 		\begin{figure}[htbp]
 			\centering
-			\includegraphics[width=1\textwidth]{Tarefa5/tarefa5.png}
+			\includegraphics[width=1\textwidth]{U1/Tarefa5/tarefa5.png}
 		\end{figure}
 		\par{Analisando o gráfico é possível verificar que a versão paralelizada tem um desempenho consideravelmente melhor do que a versão sequencial para números grandes, enquanto que para números pequenos a performance pode ser igual ou pior, a depender do overhead de inicilização.}
 		\par{Os desafios encontrados ao transformar a versão sequencial em uma versão paralelizada se devem ao acesso à variável de resultado, visto que na paralelização ela seria uma região crítica, e por isso foi necessário trabalhar com a diretiva \texttt{reduction} para permitir a soma corretamente de cada thread.}
@@ -851,11 +851,11 @@ return 0;
 		\subsection{\subtDois}
 			\begin{figure}[H]
 				\centering
-				\includegraphics[width=1\textwidth]{Tarefa6/tarefa6tempos.png}
+				\includegraphics[width=1\textwidth]{U1/Tarefa6/tarefa6tempos.png}
 			\end{figure}
 			\begin{figure}[H]
 				\centering
-				\includegraphics[width=1\textwidth]{Tarefa6/tarefa6barras.png}
+				\includegraphics[width=1\textwidth]{U1/Tarefa6/tarefa6barras.png}
 			\end{figure}
 			\par{Analisando os gráficos, podemos verificar que o único método que obteve um resultado incorreto foi o método sem proteção, devido a um problema de condição de corrida característico da falta de sincronização nesse tipo de implementação.}
 			\par{A versão sequencial define uma base para a análise dos resultados das outras implementações. A partir dela podemos verificar que as versões com \texttt{critical} e \texttt{atomic}, apesar de sequenciais, tiveram um tempo maior de execução, pois definem uma área (variável) em que apenas uma thread pode fazer mudanças por vez, o que acaba enfileirando comandos e causando um gargalo que cresce exponencialmente em relação a \texttt{n}, chegando a mais de 100 segundos para \texttt{n = 1000000000}.}
@@ -1136,11 +1136,11 @@ int main()
 		\subsection{\subtDois}
 		\begin{figure}[H]
 			\centering
-			\includegraphics[width=1\textwidth]{Tarefa7/tarefa71.png}
+			\includegraphics[width=1\textwidth]{U1/Tarefa7/tarefa71.png}
 		\end{figure}
 		\begin{figure}[H]
 			\centering
-			\includegraphics[width=1\textwidth]{Tarefa7/tarefa7versoes.png}
+			\includegraphics[width=1\textwidth]{U1/Tarefa7/tarefa7versoes.png}
 		\end{figure}
 		\begin{itemize}
 			\item A versão paralela faz a contagem correta, é melhor para valores pequenos devido ao overhead das versões paralelas, mas se torna muito inferior para valores maiores;
@@ -1157,11 +1157,11 @@ int main()
 		\end{itemize}
 		\begin{figure}[H]
 			\centering
-			\includegraphics[width=1\textwidth]{Tarefa7/tarefa72.png}
+			\includegraphics[width=1\textwidth]{U1/Tarefa7/tarefa72.png}
 		\end{figure}
 		\begin{figure}[H]
 			\centering
-			\includegraphics[width=1\textwidth]{Tarefa7/tarefa7esc.png}
+			\includegraphics[width=1\textwidth]{U1/Tarefa7/tarefa7esc.png}
 		\end{figure}
 		\par{Analisando os gráficos dos resultados dos escalonadores, é possível verificar que todos são melhores que a versão sequencial. Comparando entre eles, os resultados indicam que não existe uma diferença significativa entre os escalonadores para conjuntos muito pequenos, pois o overhead do paralelismo representa uma parcela considerável do tempo total.}
 		\par{O escalonador \texttt{auto} apresentou os maiores tempos entre as versões paralelas nos conjuntos maiores. O \texttt{auto} permite que o compilador ou a implementação do OpenMP determine a estratégia de distribuição. Como essa decisão é feita automaticamente, seu desempenho depende da implementação utilizada e das características do ambiente de execução, podendo não resultar na estratégia mais eficiente para este problema específico.}
