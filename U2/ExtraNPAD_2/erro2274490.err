@@ -1,0 +1,8 @@
+--------------------------------------------------------------------------
+WARNING: There was an error initializing an OpenFabrics device.
+
+  Local host:   r2n20
+  Local device: mlx5_0
+--------------------------------------------------------------------------
+[r2n19.npad.internal:760989] 3 more processes have sent help message help-mpi-btl-openib.txt / error in device init
+[r2n19.npad.internal:760989] Set MCA parameter "orte_base_help_aggregate" to 0 to see all help / error messages
