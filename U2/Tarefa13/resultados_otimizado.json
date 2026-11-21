@@ -1,0 +1,24 @@
+{
+  "versao": "otimizado",
+  "dispositivos": 0,
+  "threads": 4,
+  "nt": 1000,
+  "limiar_gpu": 250000,
+  "resultados": [
+    {"nx": 200, "nz": 100, "modo": "auto", "executou_em": "cpu", "tempo_total_s": 0.078791, "tempo_h2d_s": 0.000001, "tempo_d2h_s": 0.000000, "soma_receptor": 1.2026621084e+02},
+    {"nx": 200, "nz": 100, "modo": "gpu", "executou_em": "gpu", "tempo_total_s": 0.201342, "tempo_h2d_s": 0.000001, "tempo_d2h_s": 0.000000, "soma_receptor": 1.2026621084e+02},
+    {"nx": 200, "nz": 100, "modo": "cpu", "executou_em": "cpu", "tempo_total_s": 0.077924, "tempo_h2d_s": 0.000001, "tempo_d2h_s": 0.000000, "soma_receptor": 1.2026621084e+02},
+    {"nx": 400, "nz": 200, "modo": "auto", "executou_em": "cpu", "tempo_total_s": 0.407829, "tempo_h2d_s": 0.000000, "tempo_d2h_s": 0.000000, "soma_receptor": 5.5874637698e+01},
+    {"nx": 400, "nz": 200, "modo": "gpu", "executou_em": "gpu", "tempo_total_s": 0.340906, "tempo_h2d_s": 0.000001, "tempo_d2h_s": 0.000000, "soma_receptor": 5.5874637698e+01},
+    {"nx": 400, "nz": 200, "modo": "cpu", "executou_em": "cpu", "tempo_total_s": 0.373451, "tempo_h2d_s": 0.000001, "tempo_d2h_s": 0.000000, "soma_receptor": 5.5874637698e+01},
+    {"nx": 800, "nz": 400, "modo": "auto", "executou_em": "gpu", "tempo_total_s": 1.149823, "tempo_h2d_s": 0.000001, "tempo_d2h_s": 0.000000, "soma_receptor": 5.5874637698e+01},
+    {"nx": 800, "nz": 400, "modo": "gpu", "executou_em": "gpu", "tempo_total_s": 1.158940, "tempo_h2d_s": 0.000001, "tempo_d2h_s": 0.000000, "soma_receptor": 5.5874637698e+01},
+    {"nx": 800, "nz": 400, "modo": "cpu", "executou_em": "cpu", "tempo_total_s": 1.921083, "tempo_h2d_s": 0.000001, "tempo_d2h_s": 0.000001, "soma_receptor": 5.5874637698e+01},
+    {"nx": 1600, "nz": 800, "modo": "auto", "executou_em": "gpu", "tempo_total_s": 4.141295, "tempo_h2d_s": 0.000001, "tempo_d2h_s": 0.000000, "soma_receptor": 5.5874637698e+01},
+    {"nx": 1600, "nz": 800, "modo": "gpu", "executou_em": "gpu", "tempo_total_s": 4.394812, "tempo_h2d_s": 0.000001, "tempo_d2h_s": 0.000000, "soma_receptor": 5.5874637698e+01},
+    {"nx": 1600, "nz": 800, "modo": "cpu", "executou_em": "cpu", "tempo_total_s": 6.399786, "tempo_h2d_s": 0.000001, "tempo_d2h_s": 0.000000, "soma_receptor": 5.5874637698e+01},
+    {"nx": 3200, "nz": 1600, "modo": "auto", "executou_em": "gpu", "tempo_total_s": 15.726515, "tempo_h2d_s": 0.000001, "tempo_d2h_s": 0.000000, "soma_receptor": 5.5874637698e+01},
+    {"nx": 3200, "nz": 1600, "modo": "gpu", "executou_em": "gpu", "tempo_total_s": 15.697673, "tempo_h2d_s": 0.000001, "tempo_d2h_s": 0.000000, "soma_receptor": 5.5874637698e+01},
+    {"nx": 3200, "nz": 1600, "modo": "cpu", "executou_em": "cpu", "tempo_total_s": 23.349956, "tempo_h2d_s": 0.000001, "tempo_d2h_s": 0.000000, "soma_receptor": 5.5874637698e+01}
+  ]
+}
