@@ -60,3 +60,5 @@ plot1:
 	python plot.py 1
 
 all: buildrun1 build1 run1
+
+include tarefas_15_20.mk
