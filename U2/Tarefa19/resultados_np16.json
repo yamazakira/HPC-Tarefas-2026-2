@@ -1,0 +1,13 @@
+{
+  "processos": 16,
+  "nos": 1,
+  "repeticoes": 5,
+  "resultados": [
+    {"m": 1000, "n": 1000, "linhas_por_processo": 63, "tempo_scatter_s": 0.000412764, "tempo_bcast_s": 0.000150199, "tempo_calculo_s": 0.000096654, "tempo_gather_s": 0.000095318, "tempo_total_s": 0.000611997, "tempo_sequencial_s": 0.000979090, "speedup": 1.599829, "eficiencia": 0.099989, "speedup_calculo": 10.129870, "erro_max": 0},
+    {"m": 2000, "n": 2000, "linhas_por_processo": 125, "tempo_scatter_s": 0.001896843, "tempo_bcast_s": 0.000680526, "tempo_calculo_s": 0.000610707, "tempo_gather_s": 0.000189413, "tempo_total_s": 0.002611073, "tempo_sequencial_s": 0.003911052, "speedup": 1.497872, "eficiencia": 0.093617, "speedup_calculo": 6.404143, "erro_max": 0},
+    {"m": 4000, "n": 4000, "linhas_por_processo": 250, "tempo_scatter_s": 0.010550838, "tempo_bcast_s": 0.004143155, "tempo_calculo_s": 0.003225869, "tempo_gather_s": 0.000253009, "tempo_total_s": 0.013911256, "tempo_sequencial_s": 0.015996663, "speedup": 1.149908, "eficiencia": 0.071869, "speedup_calculo": 4.958869, "erro_max": 0},
+    {"m": 8000, "n": 8000, "linhas_por_processo": 500, "tempo_scatter_s": 0.044629228, "tempo_bcast_s": 0.021841819, "tempo_calculo_s": 0.013682263, "tempo_gather_s": 0.000447078, "tempo_total_s": 0.058541336, "tempo_sequencial_s": 0.063972568, "speedup": 1.092776, "eficiencia": 0.068299, "speedup_calculo": 4.675584, "erro_max": 0},
+    {"m": 12000, "n": 12000, "linhas_por_processo": 750, "tempo_scatter_s": 0.099168789, "tempo_bcast_s": 0.053445412, "tempo_calculo_s": 0.029920393, "tempo_gather_s": 0.003336480, "tempo_total_s": 0.129351797, "tempo_sequencial_s": 0.143598673, "speedup": 1.110141, "eficiencia": 0.069384, "speedup_calculo": 4.799358, "erro_max": 0},
+    {"m": 16000, "n": 16000, "linhas_por_processo": 1000, "tempo_scatter_s": 0.177250258, "tempo_bcast_s": 0.089549753, "tempo_calculo_s": 0.052165697, "tempo_gather_s": 0.004804177, "tempo_total_s": 0.229675998, "tempo_sequencial_s": 0.255831334, "speedup": 1.113879, "eficiencia": 0.069617, "speedup_calculo": 4.904206, "erro_max": 0}
+  ]
+}

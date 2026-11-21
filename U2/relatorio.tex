@@ -148,7 +148,11 @@
 		\onehalfspacing
 		\section{TAREFA 17}
 		\subsection{\subtUm}
-		\par{Texto}
+		\par{Implementar versões de um programa de envio de mensagens entre processos com MPI, onde o processo 0 envia uma mensagem para o processo 1, que imediatamente responde com o mesmo conteúdo.
+		
+		Medir o tempo total de execução de múltiplas trocas consecutivas de mensagens, registrando os tempos para diferentes tamanhos de conteúdo.
+		
+		Analisar com gráficos o comportamento identificado, identificando onde a latência domina e onde a largura de banda se torna o fator principal, explicando cada implementação e função.}
 		\subsection{\subtDois}
 		\par{Texto}
 		\subsection{\subtTres}
@@ -159,7 +163,11 @@
 		\onehalfspacing
 		\section{TAREFA 18}
 		\subsection{\subtUm}
-		\par{Texto}
+		\par{Adaptar o código de propagação de onda para que cada fonte sísmica seja processada de forma independente por um processo MPI através de um escalonador dinâmico com o modelo Master-Worker.
+		
+		O processo líder deve enviar um struct com a posição da fonte sísmica pra ser processada. Cada trabalhador processa os dados recebidos e enviar uma mensagem ao líder indicando o resultado, que irá então atualizar a informação para atribuir uma nova tarefa ao trabalhador.
+		
+		Apresentar os resultados, variando a quantidade de fontes a serem processadas, analisando o comportamento do escalonador em função da quantidade de tiros.}
 		\subsection{\subtDois}
 		\par{Texto}
 		\subsection{\subtTres}
@@ -170,7 +178,11 @@
 		\onehalfspacing
 		\section{TAREFA 19}
 		\subsection{\subtUm}
-		\par{Texto}
+		\par{Implementar um programa MPI que calcule o produto y=A*x, onde A é uma matriz M*N e x é um vetor de tamanho N.
+		
+		A matriz deve ser dividida por linhas entre os processos com MPI_Scatter, o vetor x deve ser distribuído com MPI_Bcast, e cada processo deve calcular os elementos e enviá-los de volta ao processo 0 com MPI_Gather.
+		
+		Comparar os tempos com diferentes tamanhos de matriz e números de processos, executando pelo NPAD com pelo menos dois nós.}
 		\subsection{\subtDois}
 		\par{Texto}
 		\subsection{\subtTres}
@@ -181,7 +193,11 @@
 		\onehalfspacing
 		\section{TAREFA 20}
 		\subsection{\subtUm}
-		\par{Texto}
+		\par{Desenvolver um programa paralelo para calcular a integral definida de uma função utilizando o método do trapézio.
+		
+		O programa deve dividir o trabalho entre os processos MPI com paralelismo local, tolerância a falhas, redução global e validação do resultado.
+		
+		Analisar os resultados, comparando o desempenho da execução utilizando CPU e GPU, avaliando o impacto da comunicação entre os nós no tempo total de execução.}
 		\subsection{\subtDois}
 		\par{Texto}
 		\subsection{\subtTres}

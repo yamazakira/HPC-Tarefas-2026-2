@@ -1,0 +1,1 @@
+nvcc nao encontrado. Rode 'module avail cuda' e informe CUDA_MODULE.

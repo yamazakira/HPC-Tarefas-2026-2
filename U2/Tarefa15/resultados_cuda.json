@@ -1,0 +1,26 @@
+{
+  "versao": "cuda",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "largura": 5184,
+  "altura": 3888,
+  "canais": 3,
+  "raio": 25,
+  "repeticoes": 5,
+  "tempo_h2d_ms": 16.381792,
+  "configuracoes": [
+    {"tipo": "1D", "bloco": [256, 1, 1], "grid": [78732, 1, 1], "threads_por_bloco": 256, "threads_lancadas": 20155392, "threads_ociosas_pct": 0.000000, "tempo_kernel_ms": 66.296417, "tempo_kernel_min_ms": 63.357952, "tempo_kernel_max_ms": 69.952515, "tempo_d2h_ms": 12.146208, "tempo_total_ms": 94.824417, "erros_verificacao": 0},
+    {"tipo": "1D", "bloco": [1024, 1, 1], "grid": [19683, 1, 1], "threads_por_bloco": 1024, "threads_lancadas": 20155392, "threads_ociosas_pct": 0.000000, "tempo_kernel_ms": 63.688091, "tempo_kernel_min_ms": 63.681538, "tempo_kernel_max_ms": 63.694847, "tempo_d2h_ms": 9.808736, "tempo_total_ms": 89.878624, "erros_verificacao": 0},
+    {"tipo": "2D", "bloco": [8, 8, 1], "grid": [648, 486, 1], "threads_por_bloco": 64, "threads_lancadas": 20155392, "threads_ociosas_pct": 0.000000, "tempo_kernel_ms": 81.237404, "tempo_kernel_min_ms": 81.130493, "tempo_kernel_max_ms": 81.430527, "tempo_d2h_ms": 10.584704, "tempo_total_ms": 108.203896, "erros_verificacao": 0},
+    {"tipo": "2D", "bloco": [16, 16, 1], "grid": [324, 243, 1], "threads_por_bloco": 256, "threads_lancadas": 20155392, "threads_ociosas_pct": 0.000000, "tempo_kernel_ms": 63.336861, "tempo_kernel_min_ms": 63.321087, "tempo_kernel_max_ms": 63.361023, "tempo_d2h_ms": 9.956320, "tempo_total_ms": 89.674973, "erros_verificacao": 0},
+    {"tipo": "2D", "bloco": [32, 32, 1], "grid": [162, 122, 1], "threads_por_bloco": 1024, "threads_lancadas": 20238336, "threads_ociosas_pct": 0.409836, "tempo_kernel_ms": 63.337677, "tempo_kernel_min_ms": 63.323135, "tempo_kernel_max_ms": 63.347713, "tempo_d2h_ms": 9.780672, "tempo_total_ms": 89.500137, "erros_verificacao": 0},
+    {"tipo": "2D", "bloco": [32, 8, 1], "grid": [162, 486, 1], "threads_por_bloco": 256, "threads_lancadas": 20155392, "threads_ociosas_pct": 0.000000, "tempo_kernel_ms": 63.399731, "tempo_kernel_min_ms": 63.389694, "tempo_kernel_max_ms": 63.421440, "tempo_d2h_ms": 10.295328, "tempo_total_ms": 90.076851, "erros_verificacao": 0},
+    {"tipo": "2D", "bloco": [64, 4, 1], "grid": [81, 972, 1], "threads_por_bloco": 256, "threads_lancadas": 20155392, "threads_ociosas_pct": 0.000000, "tempo_kernel_ms": 63.414680, "tempo_kernel_min_ms": 63.403008, "tempo_kernel_max_ms": 63.423489, "tempo_d2h_ms": 9.855168, "tempo_total_ms": 89.651642, "erros_verificacao": 0},
+    {"tipo": "2D", "bloco": [128, 1, 1], "grid": [41, 3888, 1], "threads_por_bloco": 128, "threads_lancadas": 20404224, "threads_ociosas_pct": 1.219512, "tempo_kernel_ms": 63.660236, "tempo_kernel_min_ms": 63.624191, "tempo_kernel_max_ms": 63.791103, "tempo_d2h_ms": 9.883904, "tempo_total_ms": 89.925934, "erros_verificacao": 0},
+    {"tipo": "2D", "bloco": [8, 32, 1], "grid": [648, 122, 1], "threads_por_bloco": 256, "threads_lancadas": 20238336, "threads_ociosas_pct": 0.409836, "tempo_kernel_ms": 74.808525, "tempo_kernel_min_ms": 74.703873, "tempo_kernel_max_ms": 74.843140, "tempo_d2h_ms": 9.929312, "tempo_total_ms": 101.119629, "erros_verificacao": 0},
+    {"tipo": "2D", "bloco": [1, 128, 1], "grid": [5184, 31, 1], "threads_por_bloco": 128, "threads_lancadas": 20570112, "threads_ociosas_pct": 2.016129, "tempo_kernel_ms": 706.968994, "tempo_kernel_min_ms": 706.821106, "tempo_kernel_max_ms": 707.422180, "tempo_d2h_ms": 9.817440, "tempo_total_ms": 733.168213, "erros_verificacao": 0},
+    {"tipo": "3D", "bloco": [16, 16, 1], "grid": [324, 243, 3], "threads_por_bloco": 256, "threads_lancadas": 60466176, "threads_ociosas_pct": 0.000000, "tempo_kernel_ms": 93.329407, "tempo_kernel_min_ms": 93.313026, "tempo_kernel_max_ms": 93.378563, "tempo_d2h_ms": 10.345664, "tempo_total_ms": 120.056862, "erros_verificacao": 0},
+    {"tipo": "3D", "bloco": [32, 8, 1], "grid": [162, 486, 3], "threads_por_bloco": 256, "threads_lancadas": 60466176, "threads_ociosas_pct": 0.000000, "tempo_kernel_ms": 93.390434, "tempo_kernel_min_ms": 93.381630, "tempo_kernel_max_ms": 93.396996, "tempo_d2h_ms": 9.466752, "tempo_total_ms": 119.238976, "erros_verificacao": 0}
+  ],
+  "tempo_d2h_ms": 9.466752,
+  "melhor_tempo_kernel_ms": 63.336861
+}

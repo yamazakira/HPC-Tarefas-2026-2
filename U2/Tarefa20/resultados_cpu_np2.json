@@ -1,19 +1,19 @@
 {
   "rotulo": "cpu",
   "processos": 2,
-  "threads": 4,
+  "threads": 16,
   "processos_com_gpu": 0,
   "mpi_thread": "FUNNELED",
-  "nos": [{"rank": 0, "no": "fedora", "gpu": false}, {"rank": 1, "no": "fedora", "gpu": false}],
+  "nos": [{"rank": 0, "no": "r2n48.npad.internal", "gpu": false}, {"rank": 1, "no": "r2n49.npad.internal", "gpu": false}],
   "valor_exato": 3.1415926535897931,
   "resultados": [
-    {"n": 1000000, "modo": "cpu", "tempo_total_s": 0.008140307, "tempo_calculo_s": 0.008123329, "tempo_reduce_s": 0.000016978, "mensagens_backup": 3, "integral": 3.1415926535896275, "erro_abs": 1.656453e-13, "erro_rel": 5.272653e-14, "backup_ok": true},
-    {"n": 1000000, "modo": "cpu_sem_backup", "tempo_total_s": 0.006532412, "tempo_calculo_s": 0.006530055, "tempo_reduce_s": 0.000002357, "mensagens_backup": 0, "integral": 3.141592653589627, "erro_abs": 1.660894e-13, "erro_rel": 5.286789e-14, "backup_ok": true},
-    {"n": 10000000, "modo": "cpu", "tempo_total_s": 0.018010397, "tempo_calculo_s": 0.018004342, "tempo_reduce_s": 0.000006055, "mensagens_backup": 331, "integral": 3.1415926535897913, "erro_abs": 1.776357e-15, "erro_rel": 5.654319e-16, "backup_ok": true},
-    {"n": 10000000, "modo": "cpu_sem_backup", "tempo_total_s": 0.027125593, "tempo_calculo_s": 0.020756964, "tempo_reduce_s": 0.006368629, "mensagens_backup": 0, "integral": 3.1415926535897909, "erro_abs": 2.220446e-15, "erro_rel": 7.067899e-16, "backup_ok": true},
-    {"n": 100000000, "modo": "cpu", "tempo_total_s": 0.147915610, "tempo_calculo_s": 0.147466186, "tempo_reduce_s": 0.000449424, "mensagens_backup": 3395, "integral": 3.1415926535897882, "erro_abs": 4.884981e-15, "erro_rel": 1.554938e-15, "backup_ok": true},
-    {"n": 100000000, "modo": "cpu_sem_backup", "tempo_total_s": 0.146924447, "tempo_calculo_s": 0.146916129, "tempo_reduce_s": 0.000008318, "mensagens_backup": 0, "integral": 3.1415926535898016, "erro_abs": 8.437695e-15, "erro_rel": 2.685802e-15, "backup_ok": true},
-    {"n": 1000000000, "modo": "cpu", "tempo_total_s": 1.368810645, "tempo_calculo_s": 1.366297784, "tempo_reduce_s": 0.002512861, "mensagens_backup": 31931, "integral": 3.1415926535897927, "erro_abs": 4.440892e-16, "erro_rel": 1.413580e-16, "backup_ok": true},
-    {"n": 1000000000, "modo": "cpu_sem_backup", "tempo_total_s": 1.318662027, "tempo_calculo_s": 1.318619503, "tempo_reduce_s": 0.000042524, "mensagens_backup": 0, "integral": 3.1415926535897345, "erro_abs": 5.861978e-14, "erro_rel": 1.865925e-14, "backup_ok": true}
+    {"n": 1000000, "modo": "cpu", "tempo_total_s": 0.000957764, "tempo_calculo_s": 0.000952314, "tempo_reduce_s": 0.000005450, "mensagens_backup": 10, "integral": 3.1415926535896261, "erro_abs": 1.669775e-13, "erro_rel": 5.315060e-14, "backup_ok": true},
+    {"n": 1000000, "modo": "cpu_sem_backup", "tempo_total_s": 0.000409662, "tempo_calculo_s": 0.000379986, "tempo_reduce_s": 0.000029676, "mensagens_backup": 0, "integral": 3.1415926535896257, "erro_abs": 1.674216e-13, "erro_rel": 5.329196e-14, "backup_ok": true},
+    {"n": 10000000, "modo": "cpu", "tempo_total_s": 0.001415978, "tempo_calculo_s": 0.001391593, "tempo_reduce_s": 0.000024385, "mensagens_backup": 34, "integral": 3.1415926535897922, "erro_abs": 8.881784e-16, "erro_rel": 2.827160e-16, "backup_ok": true},
+    {"n": 10000000, "modo": "cpu_sem_backup", "tempo_total_s": 0.001174292, "tempo_calculo_s": 0.001172939, "tempo_reduce_s": 0.000001353, "mensagens_backup": 0, "integral": 3.1415926535897922, "erro_abs": 8.881784e-16, "erro_rel": 2.827160e-16, "backup_ok": true},
+    {"n": 100000000, "modo": "cpu", "tempo_total_s": 0.010114044, "tempo_calculo_s": 0.010089819, "tempo_reduce_s": 0.000024225, "mensagens_backup": 279, "integral": 3.1415926535897967, "erro_abs": 3.552714e-15, "erro_rel": 1.130864e-15, "backup_ok": true},
+    {"n": 100000000, "modo": "cpu_sem_backup", "tempo_total_s": 0.009937060, "tempo_calculo_s": 0.009935648, "tempo_reduce_s": 0.000001412, "mensagens_backup": 0, "integral": 3.1415926535897962, "erro_abs": 3.108624e-15, "erro_rel": 9.895059e-16, "backup_ok": true},
+    {"n": 1000000000, "modo": "cpu", "tempo_total_s": 0.097812786, "tempo_calculo_s": 0.097698801, "tempo_reduce_s": 0.000113985, "mensagens_backup": 2644, "integral": 3.1415926535897922, "erro_abs": 8.881784e-16, "erro_rel": 2.827160e-16, "backup_ok": true},
+    {"n": 1000000000, "modo": "cpu_sem_backup", "tempo_total_s": 0.097638547, "tempo_calculo_s": 0.097577021, "tempo_reduce_s": 0.000061526, "mensagens_backup": 0, "integral": 3.1415926535897922, "erro_abs": 8.881784e-16, "erro_rel": 2.827160e-16, "backup_ok": true}
   ]
 }

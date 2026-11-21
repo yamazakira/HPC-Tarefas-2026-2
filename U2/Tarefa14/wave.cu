@@ -1,9 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
-#define NX 200
-#define NZ 100
+static int NX = 200;
+static int NZ = 100;
+
+static const size_t tamanhos[] = {200, 400, 800, 1600, 3200};
+#define NUM_TAMANHOS (sizeof(tamanhos) / sizeof(tamanhos[0]))
+
+static int salvar_campo = 0;
+static double soma_receptor = 0.0;
+
+static double agora(void)
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec + ts.tv_nsec * 1e-9;
+}
 
 #define DX 10.0
 #define DZ 10.0
@@ -84,7 +98,9 @@ __global__ void atualiza_campo(
     const double *u,
     const double *u_old,
     double *u_new,
-    double dt2)
+    double dt2,
+    int NX,
+    int NZ)
 {
     int ix = blockIdx.x * blockDim.x + threadIdx.x;
     int iz = blockIdx.y * blockDim.y + threadIdx.y;
@@ -120,7 +136,7 @@ __global__ void atualiza_campo(
 /* --------------------------------------------------
  * Propagação da onda
  * -------------------------------------------------- */
-int main()
+static double simula(void)
 {
     /*
      * Campo de velocidade
@@ -149,7 +165,7 @@ int main()
 
     if (!vel || !u || !u_old || !u_new) {
         printf("Erro de alocacao de memoria\n");
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
     cudaMemset(u, 0, NX * NZ * sizeof(double));
@@ -172,7 +188,7 @@ int main()
 
     if (receiver == NULL) {
         printf("Erro ao abrir receiver.dat\n");
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
 
@@ -191,6 +207,9 @@ int main()
     dim3 block(16, 16);
     dim3 grid((NX + block.x - 1) / block.x, (NZ + block.y - 1) / block.y);
 
+
+    soma_receptor = 0.0;
+    double inicio = agora();
 
     /* ------------------------------------------------
      * Loop temporal
@@ -213,7 +232,7 @@ int main()
          * ---------------------------------------------
          */
 
-        atualiza_campo<<<grid, block>>>(vel, u, u_old, u_new, dt2);
+        atualiza_campo<<<grid, block>>>(vel, u, u_old, u_new, dt2, NX, NZ);
 
         cudaDeviceSynchronize();
 
@@ -244,6 +263,8 @@ int main()
             u_new[receiver_id]
         );
 
+        soma_receptor += fabs(u_new[receiver_id]);
+
 
         /*
          * ---------------------------------------------
@@ -259,7 +280,8 @@ int main()
             it
         );
 
-        salva_binario(nome, u_new);
+        if (salvar_campo)
+            salva_binario(nome, u_new);
 
 
         /*
@@ -292,6 +314,8 @@ int main()
     }
 
 
+    double tempo = agora() - inicio;
+
     fclose(receiver);
 
     cudaFree(vel);
@@ -301,6 +325,44 @@ int main()
 
 
     printf("\nSimulacao finalizada.\n");
+
+    return tempo;
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc > 1)
+        salvar_campo = atoi(argv[1]);
+
+    cudaFree(0);
+
+    cudaDeviceProp prop;
+    cudaGetDeviceProperties(&prop, 0);
+
+    FILE *saida = fopen("resultados_unificada.json", "w");
+
+    if (saida == NULL)
+        return 1;
+
+    fprintf(saida, "{\n  \"versao\": \"memoria_unificada\",\n  \"gpu\": \"%s\",\n"
+                   "  \"nt\": %d,\n  \"resultados\": [\n", prop.name, NT);
+
+    for (size_t i = 0; i < NUM_TAMANHOS; i++) {
+        NX = (int)tamanhos[i];
+        NZ = (int)tamanhos[i] / 2;
+
+        double tempo = simula();
+
+        printf("[UNIFICADA] %dx%d: %.6f s\n", NX, NZ, tempo);
+
+        fprintf(saida,
+                "    {\"nx\": %d, \"nz\": %d, \"tempo_total_s\": %.6f, "
+                "\"soma_receptor\": %.10e}%s\n",
+                NX, NZ, tempo, soma_receptor, i + 1 < NUM_TAMANHOS ? "," : "");
+    }
+
+    fprintf(saida, "  ]\n}\n");
+    fclose(saida);
 
     return 0;
 }

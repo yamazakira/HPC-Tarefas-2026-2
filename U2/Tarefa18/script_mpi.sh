@@ -21,12 +21,17 @@
 cd "${SLURM_SUBMIT_DIR:-.}"
 mkdir -p outputs
 
+MPIRUN_OPTS=""
+if mpirun --version 2>&1 | grep -qi "open mpi"; then
+    MPIRUN_OPTS="--mca btl ^openib"
+fi
+
 echo "===== Build ====="
 mpicc -O2 main.c -o outputs/main -lm || exit 1
 
 for np in 3 5 9 17; do
     echo "===== ${np} processos ====="
-    mpirun -np ${np} ./outputs/main
+    mpirun -np ${np} ${MPIRUN_OPTS} ./outputs/main
 done
 
 echo "===== Graficos ====="

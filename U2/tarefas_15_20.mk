@@ -1,3 +1,5 @@
+include tarefas_11_14.mk
+
 # ============================================================
 # Unidade 2 - Tarefas 15 a 20
 # Incluido pelo Makefile da U2 com:   include tarefas_15_20.mk
@@ -8,6 +10,8 @@
 NVCC ?= nvcc
 MPICC ?= mpicc
 MPIRUN ?= mpirun
+# Bibliotecas MPI extras (ex.: Windows/MS-MPI: MPICC=gcc MPILIBS=-lmsmpi MPIRUN=mpiexec)
+MPILIBS ?=
 PYTHON ?= python
 NP ?= 4
 THREADS ?= 4
@@ -60,7 +64,7 @@ npad16:
 build17:
 	cd Tarefa17 && mkdir -p outputs && \
 	for m in send bsend rsend ssend; do \
-		$(MPICC) -O2 pingpong_$$m.c -o outputs/pingpong_$$m || exit 1; \
+		$(MPICC) -O2 pingpong_$$m.c -o outputs/pingpong_$$m $(MPILIBS) || exit 1; \
 	done
 
 run17:
@@ -81,7 +85,7 @@ npad17:
 # TAREFA 18 - Escalonador Lider-Trabalhador (onda) - NP >= 3
 # ------------------------------------------------------------
 build18:
-	cd Tarefa18 && mkdir -p outputs && $(MPICC) -O2 main.c -o outputs/main -lm
+	cd Tarefa18 && mkdir -p outputs && $(MPICC) -O2 main.c -o outputs/main -lm $(MPILIBS)
 
 run18:
 	cd Tarefa18 && $(MPIRUN) -np 3 ./outputs/main && \
@@ -102,7 +106,7 @@ npad18:
 MAX19 ?= 8000
 
 build19:
-	cd Tarefa19 && mkdir -p outputs && $(MPICC) -O2 main.c -o outputs/main -lm
+	cd Tarefa19 && mkdir -p outputs && $(MPICC) -O2 main.c -o outputs/main -lm $(MPILIBS)
 
 run19:
 	cd Tarefa19 && \
@@ -123,7 +127,7 @@ npad19:
 # ------------------------------------------------------------
 build20:
 	cd Tarefa20 && mkdir -p outputs && \
-	$(MPICC) -O2 -fopenmp main.c -o outputs/main_cpu -lm
+	$(MPICC) -O2 -fopenmp main.c -o outputs/main_cpu -lm $(MPILIBS)
 
 run20:
 	cd Tarefa20 && \
@@ -142,6 +146,34 @@ npad20:
 npad20gpu:
 	cd Tarefa20 && sbatch script_gpu.sh
 
-.PHONY: build15 run15 plot15 tarefa15 npad15 build16 run16 plot16 tarefa16 npad16 \
+# ------------------------------------------------------------
+# TODAS AS TAREFAS (11 a 20)
+#   make tarefas       -> build + execucao + graficos de todas (local;
+#                         11, 13 a 16 precisam de GPU NVIDIA)
+#   make tarefas_cpu   -> apenas as que rodam sem GPU (12, 17 a 20)
+#   make npad_todas    -> submete todos os jobs no NPAD
+#   make plots         -> gera os graficos de todas que ja tem resultados
+# ------------------------------------------------------------
+TAREFAS = 11 12 13 14 15 16 17 18 19 20
+
+tarefas: tarefa11 tarefa12 tarefa13 tarefa14 tarefa15 tarefa16 \
+	tarefa17 tarefa18 tarefa19 tarefa20
+
+tarefas_cpu: tarefa12 tarefa17 tarefa18 tarefa19 tarefa20
+
+npad_todas: npad11 npad12 npad13 npad14 npad15 npad16 \
+	npad17 npad18 npad19 npad20 npad20gpu
+
+plots:
+	@for t in $(TAREFAS); do \
+		if ls Tarefa$$t/resultados* > /dev/null 2>&1; then \
+			echo "===== Tarefa $$t ====="; \
+			(cd Tarefa$$t && $(PYTHON) plot.py) || exit 1; \
+		else \
+			echo "===== Tarefa $$t: sem resultados, pulando ====="; \
+		fi; \
+	done
+
+.PHONY: tarefas tarefas_cpu npad_todas plots build15 run15 plot15 tarefa15 npad15 build16 run16 plot16 tarefa16 npad16 \
 	build17 run17 plot17 tarefa17 npad17 build18 run18 plot18 tarefa18 npad18 \
 	build19 run19 plot19 tarefa19 npad19 build20 run20 plot20 tarefa20 npad20 npad20gpu

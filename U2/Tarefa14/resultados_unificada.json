@@ -1,0 +1,12 @@
+{
+  "versao": "memoria_unificada",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "nt": 1000,
+  "resultados": [
+    {"nx": 200, "nz": 100, "tempo_total_s": 0.197746, "soma_receptor": 1.2026621084e+02},
+    {"nx": 400, "nz": 200, "tempo_total_s": 0.073021, "soma_receptor": 5.5874637698e+01},
+    {"nx": 800, "nz": 400, "tempo_total_s": 0.068115, "soma_receptor": 5.5874637698e+01},
+    {"nx": 1600, "nz": 800, "tempo_total_s": 0.087423, "soma_receptor": 5.5874637698e+01},
+    {"nx": 3200, "nz": 1600, "tempo_total_s": 0.178504, "soma_receptor": 5.5874637698e+01}
+  ]
+}

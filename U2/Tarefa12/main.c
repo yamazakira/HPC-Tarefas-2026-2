@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <omp.h>
 
-#define NX 200
-#define NZ 100
+static int NX = 200;
+static int NZ = 100;
 
 #define DX 10.0
 #define DZ 10.0
@@ -80,8 +81,21 @@ void salva_binario(
 /* --------------------------------------------------
  * Propagação da onda
  * -------------------------------------------------- */
-int main()
+int main(int argc, char *argv[])
 {
+    int salvar = 1;
+    const char *rotulo = "padrao";
+
+    if (argc > 2)
+    {
+        NX = atoi(argv[1]);
+        NZ = atoi(argv[2]);
+    }
+    if (argc > 3)
+        salvar = atoi(argv[3]);
+    if (argc > 4)
+        rotulo = argv[4];
+
     /*
      * Campo de velocidade
      */
@@ -135,6 +149,8 @@ int main()
      * Fator da equacao de diferencas finitas
      */
     double dt2 = DT * DT;
+
+    double inicio = omp_get_wtime();
 
     /* ------------------------------------------------
      * Loop temporal
@@ -214,7 +230,8 @@ int main()
             "wavefield_%04d.bin",
             it);
 
-        salva_binario(nome, u_new);
+        if (salvar)
+            salva_binario(nome, u_new);
 
         /*
          * ---------------------------------------------
@@ -244,7 +261,26 @@ int main()
         }
     }
 
+    double tempo = omp_get_wtime() - inicio;
+
     fclose(receiver);
+
+    const char *bind = getenv("OMP_PROC_BIND");
+    const char *places = getenv("OMP_PLACES");
+
+    FILE *saida = fopen("resultados.out", "a");
+    if (saida != NULL)
+    {
+        fprintf(saida,
+                "{\"experimento\": \"%s\", \"nx\": %d, \"nz\": %d, \"nt\": %d, "
+                "\"threads\": %d, \"proc_bind\": \"%s\", \"places\": \"%s\", "
+                "\"tempo_s\": %.6f}\n",
+                rotulo, NX, NZ, NT, omp_get_max_threads(),
+                bind ? bind : "padrao", places ? places : "padrao", tempo);
+        fclose(saida);
+    }
+
+    printf("Tempo: %.6f s (%d threads, %dx%d)\n", tempo, omp_get_max_threads(), NX, NZ);
 
     free(vel);
     free(u);

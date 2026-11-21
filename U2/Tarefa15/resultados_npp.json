@@ -1,0 +1,20 @@
+{
+  "versao": "npp",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "npp_versao": "12.3.1",
+  "funcao": "nppiFilterBoxBorder_8u_C3R_Ctx",
+  "borda": "NPP_BORDER_REPLICATE",
+  "largura": 5184,
+  "altura": 3888,
+  "canais": 3,
+  "raio": 25,
+  "repeticoes": 5,
+  "tempo_h2d_ms": 27.640545,
+  "tempo_kernel_ms": 50.188084,
+  "tempo_kernel_min_ms": 50.091007,
+  "tempo_kernel_max_ms": 50.378754,
+  "tempo_d2h_ms": 12.019328,
+  "tempo_total_ms": 89.847954,
+  "erros_verificacao": 0,
+  "maior_diferenca": 0
+}

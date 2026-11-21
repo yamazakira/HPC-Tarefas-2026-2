@@ -1,9 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <omp.h>
 
-#define NX 200
-#define NZ 100
+#pragma omp declare target
+static int NX = 200;
+static int NZ = 100;
+#pragma omp end declare target
+
+static const size_t tamanhos[] = {200, 400, 800, 1600, 3200};
+#define NUM_TAMANHOS (sizeof(tamanhos) / sizeof(tamanhos[0]))
+
+static int salvar_campo = 0;
+static double soma_receptor = 0.0;
 
 #define DX 10.0
 #define DZ 10.0
@@ -80,7 +89,7 @@ void salva_binario(
 /* --------------------------------------------------
  * Propagação da onda
  * -------------------------------------------------- */
-int main()
+static double simula(void)
 {
     /*
      * Campo de velocidade
@@ -105,7 +114,7 @@ int main()
     if (!vel || !u || !u_old || !u_new)
     {
         printf("Erro de alocacao de memoria\n");
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
     /* Modelo de velocidade */
@@ -123,7 +132,7 @@ int main()
     if (receiver == NULL)
     {
         printf("Erro ao abrir receiver.dat\n");
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
     /*
@@ -135,6 +144,9 @@ int main()
      * Fator da equacao de diferencas finitas
      */
     double dt2 = DT * DT;
+
+    soma_receptor = 0.0;
+    double inicio = omp_get_wtime();
 
     /* ------------------------------------------------
      * Loop temporal
@@ -203,6 +215,8 @@ int main()
             t,
             u_new[receiver_id]);
 
+        soma_receptor += fabs(u_new[receiver_id]);
+
         /*
          * ---------------------------------------------
          * Salva o campo de onda
@@ -216,7 +230,8 @@ int main()
             "wavefield_%04d.bin",
             it);
 
-        salva_binario(nome, u_new);
+        if (salvar_campo)
+            salva_binario(nome, u_new);
 
         /*
          * ---------------------------------------------
@@ -246,6 +261,8 @@ int main()
         }
     }
 
+    double tempo = omp_get_wtime() - inicio;
+
     fclose(receiver);
 
     free(vel);
@@ -254,6 +271,46 @@ int main()
     free(u_new);
 
     printf("\nSimulacao finalizada.\n");
+
+    return tempo;
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc > 1)
+        salvar_campo = atoi(argv[1]);
+
+#pragma omp target
+    {
+    }
+
+    FILE *saida = fopen("resultados_nao_otimizado.json", "w");
+
+    if (saida == NULL)
+        return 1;
+
+    fprintf(saida, "{\n  \"versao\": \"nao_otimizado\",\n  \"dispositivos\": %d,\n"
+                   "  \"threads\": %d,\n  \"nt\": %d,\n  \"resultados\": [\n",
+            omp_get_num_devices(), omp_get_max_threads(), NT);
+
+    for (size_t i = 0; i < NUM_TAMANHOS; i++)
+    {
+        NX = (int)tamanhos[i];
+        NZ = (int)tamanhos[i] / 2;
+#pragma omp target update to(NX, NZ)
+
+        double tempo = simula();
+
+        printf("[NAO OTIMIZADO] %dx%d: %.6f s\n", NX, NZ, tempo);
+
+        fprintf(saida,
+                "    {\"nx\": %d, \"nz\": %d, \"modo\": \"gpu_map\", \"tempo_total_s\": %.6f, "
+                "\"soma_receptor\": %.10e}%s\n",
+                NX, NZ, tempo, soma_receptor, i + 1 < NUM_TAMANHOS ? "," : "");
+    }
+
+    fprintf(saida, "  ]\n}\n");
+    fclose(saida);
 
     return 0;
 }

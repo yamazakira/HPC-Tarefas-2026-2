@@ -1,0 +1,3 @@
+A variável $SIF contém agora o local do arquivo nvhpc_22.5_devel.sif
+/var/tmp/slurmd.spool/job2279779/slurm_script: line 74: 291357 Killed                  ./outputs/kernel
+slurmstepd: error: Detected 1 oom-kill event(s) in StepId=2279779.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.

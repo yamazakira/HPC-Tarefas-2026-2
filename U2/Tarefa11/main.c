@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <omp.h>
 #include <stddef.h>
+#include <string.h>
 
 static const size_t tamanhos[] = {
     1000,
@@ -84,6 +85,34 @@ double calcularGPU(Vetores *v, size_t tamanho)
     return omp_get_wtime() - inicio;
 }
 
+double calcularGPUSeparado(Vetores *v, size_t tamanho, double *transferencia)
+{
+    float *A = v->A;
+    float *B = v->B;
+    float *C = v->C;
+
+    double inicio = omp_get_wtime();
+
+    #pragma omp target enter data map(to: B[0:tamanho], C[0:tamanho]) \
+        map(alloc: A[0:tamanho])
+
+    double inicioKernel = omp_get_wtime();
+
+    #pragma omp target teams distribute parallel for
+    for (size_t i = 0; i < tamanho; i++) {
+        A[i] = B[i] + C[i];
+    }
+
+    double tempoKernel = omp_get_wtime() - inicioKernel;
+
+    #pragma omp target exit data map(from: A[0:tamanho]) \
+        map(release: B[0:tamanho], C[0:tamanho])
+
+    *transferencia = (omp_get_wtime() - inicio) - tempoKernel;
+
+    return tempoKernel;
+}
+
 int verificarResultado(Vetores *v, size_t tamanho)
 {
     for (size_t i = 0; i < tamanho; i++) {
@@ -97,13 +126,18 @@ int verificarResultado(Vetores *v, size_t tamanho)
 
 int main(void)
 {
-    FILE *arquivo = fopen("resultados.csv", "w");
+    FILE *arquivo = fopen("resultados.json", "w");
 
     if (arquivo == NULL) {
         return EXIT_FAILURE;
     }
 
-    fprintf(arquivo, "tamanho_vetor,executado_por,tempo\n");
+    #pragma omp target
+    {
+    }
+
+    fprintf(arquivo, "{\n  \"dispositivos\": %d,\n  \"threads\": %d,\n  \"resultados\": [\n",
+            omp_get_num_devices(), omp_get_max_threads());
 
     for (size_t i = 0; i < NUM_TAMANHOS; i++) {
         size_t tamanho = tamanhos[i];
@@ -112,13 +146,13 @@ int main(void)
 
         double tempoCPU = calcularCPU(v, tamanho);
 
-        if (!verificarResultado(zv, tamanho)) {
+        if (!verificarResultado(v, tamanho)) {
             liberarVetores(v);
             fclose(arquivo);
             return EXIT_FAILURE;
         }
 
-        fprintf(arquivo, "%zu,cpu,%.10f\n", tamanho, tempoCPU);
+        memset(v->A, 0, tamanho * sizeof(float));
 
         double tempoGPU = calcularGPU(v, tamanho);
 
@@ -128,14 +162,30 @@ int main(void)
             return EXIT_FAILURE;
         }
 
-        fprintf(arquivo, "%zu,gpu,%.10f\n", tamanho, tempoGPU);
+        memset(v->A, 0, tamanho * sizeof(float));
 
-        printf("%zu: CPU = %.10f s | GPU = %.10f s\n",
-               tamanho, tempoCPU, tempoGPU);
+        double tempoTransferencia = 0.0;
+        double tempoKernel = calcularGPUSeparado(v, tamanho, &tempoTransferencia);
+
+        if (!verificarResultado(v, tamanho)) {
+            liberarVetores(v);
+            fclose(arquivo);
+            return EXIT_FAILURE;
+        }
+
+        fprintf(arquivo,
+                "    {\"tamanho\": %zu, \"cpu_s\": %.10f, \"gpu_total_s\": %.10f, "
+                "\"gpu_kernel_s\": %.10f, \"gpu_transferencia_s\": %.10f}%s\n",
+                tamanho, tempoCPU, tempoGPU, tempoKernel, tempoTransferencia,
+                i + 1 < NUM_TAMANHOS ? "," : "");
+
+        printf("%zu: CPU = %.10f s | GPU = %.10f s (kernel %.10f s + transferencia %.10f s)\n",
+               tamanho, tempoCPU, tempoGPU, tempoKernel, tempoTransferencia);
 
         liberarVetores(v);
     }
 
+    fprintf(arquivo, "  ]\n}\n");
     fclose(arquivo);
 
     return EXIT_SUCCESS;

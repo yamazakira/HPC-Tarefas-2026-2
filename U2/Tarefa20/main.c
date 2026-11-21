@@ -340,6 +340,15 @@ int main(int argc, char *argv[])
     if (threads < 2) threads = 2;
 
     /* Deteccao automatica da GPU em cada processo */
+    MPI_Comm comm_no;
+    int rank_no;
+    MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, rank,
+                        MPI_INFO_NULL, &comm_no);
+    MPI_Comm_rank(comm_no, &rank_no);
+    MPI_Comm_free(&comm_no);
+    if (omp_get_num_devices() > 0)
+        omp_set_default_device(rank_no % omp_get_num_devices());
+
     int tem_gpu = gpu_disponivel();
     int processos_com_gpu = 0;
     MPI_Allreduce(&tem_gpu, &processos_com_gpu, 1, MPI_INT, MPI_SUM,

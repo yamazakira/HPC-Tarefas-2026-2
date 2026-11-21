@@ -22,6 +22,11 @@
 cd "${SLURM_SUBMIT_DIR:-.}"
 mkdir -p outputs
 
+MPIRUN_OPTS=""
+if mpirun --version 2>&1 | grep -qi "open mpi"; then
+    MPIRUN_OPTS="--mca btl ^openib"
+fi
+
 echo "===== Build ====="
 for modo in send bsend rsend ssend; do
     mpicc -O2 pingpong_${modo}.c -o outputs/pingpong_${modo} || exit 1
@@ -29,7 +34,7 @@ done
 
 for modo in send bsend rsend ssend; do
     echo "===== MPI_${modo^} ====="
-    mpirun -np 2 ./outputs/pingpong_${modo}
+    mpirun -np 2 ${MPIRUN_OPTS} ./outputs/pingpong_${modo}
 done
 
 echo "===== Graficos ====="

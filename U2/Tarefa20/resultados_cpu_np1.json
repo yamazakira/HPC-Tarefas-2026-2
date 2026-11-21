@@ -1,19 +1,19 @@
 {
   "rotulo": "cpu",
   "processos": 1,
-  "threads": 4,
+  "threads": 16,
   "processos_com_gpu": 0,
   "mpi_thread": "FUNNELED",
-  "nos": [{"rank": 0, "no": "fedora", "gpu": false}],
+  "nos": [{"rank": 0, "no": "r2n48.npad.internal", "gpu": false}],
   "valor_exato": 3.1415926535897931,
   "resultados": [
-    {"n": 1000000, "modo": "cpu", "tempo_total_s": 0.001944784, "tempo_calculo_s": 0.001939461, "tempo_reduce_s": 0.000005323, "mensagens_backup": 20, "integral": 3.141592653589627, "erro_abs": 1.660894e-13, "erro_rel": 5.286789e-14, "backup_ok": true},
-    {"n": 1000000, "modo": "cpu_sem_backup", "tempo_total_s": 0.001526830, "tempo_calculo_s": 0.001526422, "tempo_reduce_s": 0.000000408, "mensagens_backup": 0, "integral": 3.1415926535896244, "erro_abs": 1.687539e-13, "erro_rel": 5.371603e-14, "backup_ok": true},
-    {"n": 10000000, "modo": "cpu", "tempo_total_s": 0.013744018, "tempo_calculo_s": 0.013742970, "tempo_reduce_s": 0.000001048, "mensagens_backup": 160, "integral": 3.141592653589814, "erro_abs": 2.087219e-14, "erro_rel": 6.643825e-15, "backup_ok": true},
-    {"n": 10000000, "modo": "cpu_sem_backup", "tempo_total_s": 0.015388995, "tempo_calculo_s": 0.015386907, "tempo_reduce_s": 0.000002088, "mensagens_backup": 0, "integral": 3.1415926535897953, "erro_abs": 2.220446e-15, "erro_rel": 7.067899e-16, "backup_ok": true},
-    {"n": 100000000, "modo": "cpu", "tempo_total_s": 0.132326169, "tempo_calculo_s": 0.132325071, "tempo_reduce_s": 0.000001098, "mensagens_backup": 1715, "integral": 3.1415926535898047, "erro_abs": 1.154632e-14, "erro_rel": 3.675308e-15, "backup_ok": true},
-    {"n": 100000000, "modo": "cpu_sem_backup", "tempo_total_s": 0.130425086, "tempo_calculo_s": 0.130422436, "tempo_reduce_s": 0.000002650, "mensagens_backup": 0, "integral": 3.1415926535898056, "erro_abs": 1.243450e-14, "erro_rel": 3.958024e-15, "backup_ok": true},
-    {"n": 1000000000, "modo": "cpu", "tempo_total_s": 1.367235767, "tempo_calculo_s": 1.367234727, "tempo_reduce_s": 0.000001040, "mensagens_backup": 17030, "integral": 3.1415926535895826, "erro_abs": 2.104983e-13, "erro_rel": 6.700369e-14, "backup_ok": true},
-    {"n": 1000000000, "modo": "cpu_sem_backup", "tempo_total_s": 1.323208794, "tempo_calculo_s": 1.323206048, "tempo_reduce_s": 0.000002746, "mensagens_backup": 0, "integral": 3.1415926535897762, "erro_abs": 1.687539e-14, "erro_rel": 5.371603e-15, "backup_ok": true}
+    {"n": 1000000, "modo": "cpu", "tempo_total_s": 0.000887502, "tempo_calculo_s": 0.000886039, "tempo_reduce_s": 0.000001463, "mensagens_backup": 5, "integral": 3.1415926535896257, "erro_abs": 1.674216e-13, "erro_rel": 5.329196e-14, "backup_ok": true},
+    {"n": 1000000, "modo": "cpu_sem_backup", "tempo_total_s": 0.000343808, "tempo_calculo_s": 0.000343718, "tempo_reduce_s": 0.000000090, "mensagens_backup": 0, "integral": 3.1415926535896257, "erro_abs": 1.674216e-13, "erro_rel": 5.329196e-14, "backup_ok": true},
+    {"n": 10000000, "modo": "cpu", "tempo_total_s": 0.002209643, "tempo_calculo_s": 0.002209463, "tempo_reduce_s": 0.000000180, "mensagens_backup": 31, "integral": 3.1415926535897905, "erro_abs": 2.664535e-15, "erro_rel": 8.481479e-16, "backup_ok": true},
+    {"n": 10000000, "modo": "cpu_sem_backup", "tempo_total_s": 0.002049441, "tempo_calculo_s": 0.002049291, "tempo_reduce_s": 0.000000150, "mensagens_backup": 0, "integral": 3.1415926535897909, "erro_abs": 2.220446e-15, "erro_rel": 7.067899e-16, "backup_ok": true},
+    {"n": 100000000, "modo": "cpu", "tempo_total_s": 0.019643917, "tempo_calculo_s": 0.019643787, "tempo_reduce_s": 0.000000130, "mensagens_backup": 275, "integral": 3.1415926535897882, "erro_abs": 4.884981e-15, "erro_rel": 1.554938e-15, "backup_ok": true},
+    {"n": 100000000, "modo": "cpu_sem_backup", "tempo_total_s": 0.019579135, "tempo_calculo_s": 0.019578925, "tempo_reduce_s": 0.000000210, "mensagens_backup": 0, "integral": 3.1415926535897873, "erro_abs": 5.773160e-15, "erro_rel": 1.837654e-15, "backup_ok": true},
+    {"n": 1000000000, "modo": "cpu", "tempo_total_s": 0.194989352, "tempo_calculo_s": 0.194988690, "tempo_reduce_s": 0.000000662, "mensagens_backup": 2644, "integral": 3.1415926535897909, "erro_abs": 2.220446e-15, "erro_rel": 7.067899e-16, "backup_ok": true},
+    {"n": 1000000000, "modo": "cpu_sem_backup", "tempo_total_s": 0.194887108, "tempo_calculo_s": 0.194885475, "tempo_reduce_s": 0.000001633, "mensagens_backup": 0, "integral": 3.1415926535897913, "erro_abs": 1.776357e-15, "erro_rel": 5.654319e-16, "backup_ok": true}
   ]
 }

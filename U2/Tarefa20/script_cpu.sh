@@ -28,7 +28,7 @@ export OMP_PROC_BIND=false
 # Open MPI prende cada processo a 1 nucleo por padrao: liberar para o OpenMP
 MPIRUN_OPTS=""
 if mpirun --version 2>&1 | grep -qi "open mpi"; then
-    MPIRUN_OPTS="--bind-to none --map-by node"
+    MPIRUN_OPTS="--bind-to none --map-by node --mca btl ^openib"
 fi
 
 echo "===== Build ====="
