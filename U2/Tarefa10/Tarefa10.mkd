@@ -1,0 +1,22 @@
+# Tarefa10 10
+
+Akira Vitor de Lima Yamazaki - 20240021764
+
+## Notebook Pessoal
+```
+Modelo: Lenovo ThinkPad X270
+Processador: Intel Core i5-7300U 4 threads
+Memória: 8GB RAM
+GPU: Intel HD Gaphics 620 (KBL GT2)
+SO: Fedora Linux 44
+```
+
+Conta com arquitetura de multiprocessadores, com dois núcleos que permitem o compartilhamento de algum nível de memória cache e a memória principal, permitindo o programador coordernar o paralelismo em seu programa.
+
+Em questão de aceleradores, possui uma GPU integrada.
+
+Pela classificação de flynn, a CPU se encaixa como MIMD, em que que cada core pode executar instruções diferentes de forma independente, sobre dados independentes. Enquanto a GPU usa estrutura SIMD, com uma única instrução operando sobre diversos dados diferentes.
+
+A GPU utiliza a arquitetura gráfica Intel Gen9.5, associada à plataforma Kaby Lake (KBL GT2).
+
+Para essa máquina, a estratégia mais adequada é explorar paralelismo em threads e em instruções na CPU, e paralelismo de dados na GPU quando o problema tiver operações massivamente paralelas. O paralelismo entre processos também pode ser usado, mas tende a ter um custo maior de memória e comunicação.
