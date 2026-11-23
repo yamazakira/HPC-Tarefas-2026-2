@@ -45,12 +45,14 @@ def grafico(exp, metrica, arquivo, titulo, ylabel):
         tmax = max(tmax, max(ts))
         if metrica == "speedup":
             ys = [t1 / tp for tp in tempos]
+        elif metrica == "speedup_fraca":
+            ys = [t * t1 / tp for tp, t in zip(tempos, ts)]
         elif metrica == "eficiencia":
             ys = [100 * t1 / tp / t for tp, t in zip(tempos, ts)]
         else:
             ys = [100 * t1 / tp for tp in tempos]
         plt.plot(ts, ys, marker="o", linewidth=2, label=NOMES.get(af, af))
-    if metrica == "speedup":
+    if metrica in ("speedup", "speedup_fraca"):
         plt.plot([1, tmax], [1, tmax], "k--", label="Ideal")
     else:
         plt.axhline(100, color="black", linestyle="--", label="Ideal")
@@ -74,6 +76,9 @@ grafico("forte", "speedup", "tarefa12_speedup.png",
 grafico("forte", "eficiencia", "tarefa12_eficiencia.png",
         f"Escalabilidade forte - eficiência (malha {forte['nx']}x{forte['nz']})",
         "Eficiência (%)  [T1 / (p · Tp)]")
+grafico("fraca", "speedup_fraca", "tarefa12_speedup_fraca.png",
+        "Escalabilidade fraca - speedup escalado (malha cresce com o nº de threads)",
+        "Speedup escalado (p · T1 / Tp)")
 grafico("fraca", "fraca", "tarefa12_fraca.png",
         "Escalabilidade fraca - eficiência (malha cresce com o nº de threads)",
         "Eficiência fraca (%)  [T1 / Tp]")

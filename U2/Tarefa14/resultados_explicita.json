@@ -3,10 +3,12 @@
   "gpu": "NVIDIA A100-SXM4-80GB",
   "nt": 1000,
   "resultados": [
-    {"nx": 200, "nz": 100, "tempo_total_s": 0.127235, "tempo_h2d_s": 0.000208, "tempo_d2h_s": 0.000082, "soma_receptor": 1.2026621084e+02},
-    {"nx": 400, "nz": 200, "tempo_total_s": 0.025101, "tempo_h2d_s": 0.000665, "tempo_d2h_s": 0.000295, "soma_receptor": 5.5874637698e+01},
-    {"nx": 800, "nz": 400, "tempo_total_s": 0.032510, "tempo_h2d_s": 0.003113, "tempo_d2h_s": 0.001710, "soma_receptor": 5.5874637698e+01},
-    {"nx": 1600, "nz": 800, "tempo_total_s": 0.060358, "tempo_h2d_s": 0.007841, "tempo_d2h_s": 0.005401, "soma_receptor": 5.5874637698e+01},
-    {"nx": 3200, "nz": 1600, "tempo_total_s": 0.162140, "tempo_h2d_s": 0.010437, "tempo_d2h_s": 0.023951, "soma_receptor": 5.5874637698e+01}
+    {"nx": 200, "nz": 100, "tempo_total_s": 0.026237, "tempo_h2d_s": 0.000226, "tempo_d2h_s": 0.000079, "soma_receptor": 1.2026621084e+02},
+    {"nx": 400, "nz": 200, "tempo_total_s": 0.024894, "tempo_h2d_s": 0.000732, "tempo_d2h_s": 0.000512, "soma_receptor": 5.5874637698e+01},
+    {"nx": 800, "nz": 400, "tempo_total_s": 0.033072, "tempo_h2d_s": 0.003167, "tempo_d2h_s": 0.001786, "soma_receptor": 5.5874637698e+01},
+    {"nx": 1600, "nz": 800, "tempo_total_s": 0.063744, "tempo_h2d_s": 0.010209, "tempo_d2h_s": 0.005847, "soma_receptor": 5.5874637698e+01},
+    {"nx": 3200, "nz": 1600, "tempo_total_s": 0.180305, "tempo_h2d_s": 0.028350, "tempo_d2h_s": 0.025003, "soma_receptor": 5.5874637698e+01},
+    {"nx": 6400, "nz": 3200, "tempo_total_s": 0.621950, "tempo_h2d_s": 0.075664, "tempo_d2h_s": 0.092862, "soma_receptor": 5.5874637698e+01},
+    {"nx": 12800, "nz": 6400, "tempo_total_s": 2.399816, "tempo_h2d_s": 0.277026, "tempo_d2h_s": 0.369554, "soma_receptor": 5.5874637698e+01}
   ]
 }

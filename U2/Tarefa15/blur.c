@@ -9,7 +9,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-#define RAIO_BLUR 25  // Janela de 51x51 pixels
+#define RAIO_BLUR 25
 
 #define ARQUIVO_JSON "resultados_seq.json"
 
@@ -34,7 +34,6 @@ void blur_sequencial(
                 long soma = 0;
                 int quantidade = 0;
 
-                // Percorre a vizinhanca de cada pixel
                 for (int dy = -RAIO_BLUR;
                      dy <= RAIO_BLUR; dy++) {
 
@@ -75,7 +74,6 @@ int main(int argc, char *argv[])
 
     int largura, altura, canais;
 
-    // Leitura da imagem JPEG
     unsigned char *imagem = stbi_load(
         argv[1], &largura, &altura, &canais, 0);
 
@@ -101,7 +99,6 @@ int main(int argc, char *argv[])
     printf("Aplicando blur com janela %dx%d...\n",
            2 * RAIO_BLUR + 1, 2 * RAIO_BLUR + 1);
 
-    // Processamento sequencial (apenas o filtro e cronometrado)
     double t_ini = tempo_atual();
 
     blur_sequencial(
@@ -112,7 +109,6 @@ int main(int argc, char *argv[])
 
     printf("[SEQ] Tempo do blur: %f s\n", tempo_s);
 
-    // Exporta os resultados em JSON na pasta da atividade
     FILE *json = fopen(ARQUIVO_JSON, "w");
     if (json != NULL) {
         fprintf(json,
@@ -131,7 +127,6 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Erro ao abrir %s\n", ARQUIVO_JSON);
     }
 
-    // Salva a imagem borrada em JPEG
     int sucesso = stbi_write_jpg(
         argv[2], largura, altura, canais, resultado, 95);
 
@@ -146,5 +141,3 @@ int main(int argc, char *argv[])
 
     return sucesso ? 0 : 1;
 }
-// compilar gcc -O2 blur.c -o blur -lm
-// executar ./blur entrada.jpg saida.jpg

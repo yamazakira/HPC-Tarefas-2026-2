@@ -1,18 +1,3 @@
-/*
- * Tarefa 17 - Codigo comum aos quatro programas de ping-pong MPI
- *
- * Cada programa (pingpong_send.c, pingpong_bsend.c, pingpong_rsend.c,
- * pingpong_ssend.c) implementa apenas a funcao:
- *
- *     void troca_mensagens(char *envio, char *recepcao, char *recepcao2,
- *                          int bytes, int repeticoes, int rank);
- *
- * que realiza `repeticoes` trocas ida-e-volta (ping-pong) de `bytes` bytes
- * entre os processos 0 e 1 usando o modo de envio correspondente.
- *
- * Este arquivo cuida do restante: lista de tamanhos, aquecimento, medicao
- * com MPI_Wtime, validacao e exportacao dos resultados em JSON.
- */
 #ifndef PINGPONG_COMUM_H
 #define PINGPONG_COMUM_H
 
@@ -26,7 +11,6 @@
 
 #define AQUECIMENTO 10
 
-/* Tamanhos das mensagens (bytes): de 8 B ate 16 MB */
 static const size_t tamanhos[] = {
     8,       16,      32,      64,      128,     256,     512,
     1024,    2048,    4096,    8192,    16384,   32768,   65536,
@@ -44,7 +28,6 @@ static size_t maior_tamanho(void)
     return m;
 }
 
-/* Mensagens pequenas: muitas repeticoes; grandes: menos (~64 MB trafegados) */
 static int repeticoes_para(size_t bytes)
 {
     if (bytes <= 65536) return 1000;
@@ -52,11 +35,9 @@ static int repeticoes_para(size_t bytes)
     return r < 20 ? 20 : (int)r;
 }
 
-/* Implementada em cada programa */
 static void troca_mensagens(char *envio, char *recepcao, char *recepcao2,
                             int bytes, int repeticoes, int rank);
 
-/* Funcoes opcionais de preparo/encerramento (ex.: buffer do MPI_Bsend) */
 static void prepara_modo(size_t maior_mensagem);
 static void encerra_modo(void);
 
@@ -77,7 +58,6 @@ static int executa_pingpong(int argc, char *argv[], const char *modo,
         return 1;
     }
 
-    /* Nome dos nos (para saber se a troca e intra ou inter-no) */
     char no[MPI_MAX_PROCESSOR_NAME], no_outro[MPI_MAX_PROCESSOR_NAME];
     int tam_nome;
     memset(no, 0, sizeof(no));
@@ -131,7 +111,6 @@ static int executa_pingpong(int argc, char *argv[], const char *modo,
         int bytes = (int)tamanhos[t];
         int repeticoes = repeticoes_para(tamanhos[t]);
 
-        /* Aquecimento: estabelece conexoes e aquece caches */
         MPI_Barrier(MPI_COMM_WORLD);
         troca_mensagens(envio, recepcao, recepcao2, bytes, AQUECIMENTO, rank);
 
@@ -143,12 +122,12 @@ static int executa_pingpong(int argc, char *argv[], const char *modo,
         double fim = MPI_Wtime();
 
         if (rank == 0) {
-            /* A resposta precisa ser identica a mensagem enviada */
+
             int ok = memcmp(envio, recepcao, bytes) == 0;
 
             double total = fim - inicio;
             double ida_volta = total / repeticoes;
-            double latencia = ida_volta / 2.0; /* tempo de um sentido */
+            double latencia = ida_volta / 2.0;
             double banda = bytes / latencia / 1e6;
 
             printf("%10d %8d %14.6f %14.3f %14.2f %s\n", bytes, repeticoes,

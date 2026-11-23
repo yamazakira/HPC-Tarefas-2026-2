@@ -11,14 +11,19 @@ PASTA = os.path.dirname(os.path.abspath(__file__))
 
 
 def carrega(nome):
-    with open(os.path.join(PASTA, nome), encoding="utf-8") as f:
-        return json.load(f)
+    caminho = os.path.join(PASTA, nome)
+    try:
+        with open(caminho, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        print(f"[aviso] {nome} ausente ou incompleto, ignorando")
+        return None
 
 
 nao = carrega("resultados_nao_otimizado.json")
 oti = carrega("resultados_otimizado.json")
 nt = nao["nt"]
-dispositivo = "GPU" if oti["dispositivos"] > 0 else "host (sem GPU)"
+dispositivo = "GPU" if nao["dispositivos"] > 0 else "host (sem GPU)"
 
 
 def serie(dados, modo):
@@ -32,17 +37,18 @@ rotulo_tam = [f"{r['nx']}x{r['nz']}" for r in serie(nao, "gpu_map")[1]]
 plt.figure(figsize=(11, 7))
 n, pts = serie(nao, "gpu_map")
 plt.plot(n, [p["tempo_total_s"] for p in pts], marker="o", linewidth=2,
-         label="Não otimizado (map a cada passo)")
-for modo, nome in (("gpu", "Otimizado - target data (sempre GPU)"),
-                   ("cpu", f"Otimizado - if(false): CPU ({oti['threads']} threads)"),
-                   ("auto", f"Otimizado - automático (GPU se pontos ≥ {oti['limiar_gpu']})")):
+         label="GPU não otimizado (map a cada passo)")
+for modo, nome in () if oti is None else (("gpu", "GPU otimizado (target data)"),
+                   ("cpu", f"CPU paralela (OpenMP, {oti['threads']} threads)"),
+                   ("auto", f"Automático (GPU se pontos ≥ {oti['limiar_gpu']}, senão CPU)")):
     n, pts = serie(oti, modo)
     plt.plot(n, [p["tempo_total_s"] for p in pts], marker="s",
              linestyle="--" if modo == "auto" else "-", linewidth=2, label=nome)
-plt.axvline(oti["limiar_gpu"], color="gray", linestyle=":")
+if oti is not None:
+    plt.axvline(oti["limiar_gpu"], color="gray", linestyle=":")
 plt.xscale("log")
 plt.yscale("log")
-plt.xticks(n, rotulo_tam)
+plt.xticks(serie(nao, "gpu_map")[0], rotulo_tam)
 plt.minorticks_off()
 plt.xlabel("Tamanho da malha (NX x NZ)")
 plt.ylabel(f"Tempo total ({nt} passos) (s)")
@@ -53,15 +59,25 @@ plt.tight_layout()
 plt.savefig(os.path.join(PASTA, "tarefa13_tempos.png"), dpi=300)
 plt.close()
 
+if oti is None:
+    raise SystemExit("Apenas tarefa13_tempos.png gerado (sem resultados da versao otimizada).")
+
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+comuns = {r["nx"] for r in nao["resultados"]} & {r["nx"] for r in oti["resultados"] if r["modo"] == "gpu"} \
+    & {r["nx"] for r in oti["resultados"] if r["modo"] == "cpu"}
 n, p_nao = serie(nao, "gpu_map")
 _, p_gpu = serie(oti, "gpu")
 _, p_cpu = serie(oti, "cpu")
+p_nao = [p for p in p_nao if p["nx"] in comuns]
+p_gpu = [p for p in p_gpu if p["nx"] in comuns]
+p_cpu = [p for p in p_cpu if p["nx"] in comuns]
+n = [p["nx"] * p["nz"] for p in p_nao]
+rotulo_tam = [f"{p['nx']}x{p['nz']}" for p in p_nao]
 x = np.arange(len(n))
 ax1.bar(x - 0.2, [a["tempo_total_s"] / b["tempo_total_s"] for a, b in zip(p_nao, p_gpu)],
-        0.4, label="Não otimizado / otimizado (GPU)")
+        0.4, label="GPU não otimizado / GPU otimizado")
 ax1.bar(x + 0.2, [c["tempo_total_s"] / b["tempo_total_s"] for c, b in zip(p_cpu, p_gpu)],
-        0.4, label="CPU / otimizado (GPU)")
+        0.4, label="CPU / GPU otimizado")
 ax1.axhline(1, color="black", linewidth=1)
 ax1.set_xticks(x)
 ax1.set_xticklabels(rotulo_tam)

@@ -1,33 +1,3 @@
-/*
- * Tarefa 20 - Integral pelo metodo dos trapezios (MPI + OpenMP + GPU)
- *             com envio periodico da soma parcial ao processo vizinho
- *
- *   I = integral de 0 a 1 de 4 / (1 + x^2) dx = pi
- *
- * 1. Distribuicao: os N trapezios sao divididos em blocos contiguos entre
- *    os processos MPI.
- * 2. Paralelismo local com OpenMP. Se houver GPU disponivel (detectada em
- *    tempo de execucao com omp_get_num_devices / omp_is_initial_device),
- *    a parcela do processo e calculada na GPU com "omp target"; caso
- *    contrario, nas threads da CPU.
- * 3. Tolerancia a falhas: a cada 100 amostras processadas, a soma parcial
- *    e enviada ao vizinho (rank + 1) % P, que a guarda em uma variavel
- *    local (backup). Somente a thread 0 comunica (MPI_THREAD_FUNNELED);
- *    as demais threads continuam calculando.
- * 4. Reducao global com MPI_Reduce.
- * 5. Validacao contra o valor analitico (pi).
- *
- * Modos executados para cada N:
- *   cpu             - threads OpenMP na CPU, com envio ao vizinho
- *   cpu_sem_backup  - igual, mas sem envio (mede o custo da comunicacao)
- *   gpu             - calculo na GPU (so se houver dispositivo), com envio
- *
- * compilar (CPU):  mpicc -O2 -fopenmp main.c -o main -lm
- * compilar (GPU):  mpicc -O2 -fopenmp -foffload=nvptx-none -fno-stack-protector main.c -o main -lm
- *                  (ou NVHPC: mpicc -O2 -mp=gpu main.c -o main)
- * executar:        OMP_NUM_THREADS=8 mpirun -np 4 ./main [rotulo]
- *                  (gera resultados_np<P>.json ou resultados_<rotulo>_np<P>.json)
- */
 #include <math.h>
 #include <mpi.h>
 #include <omp.h>
@@ -37,17 +7,16 @@
 #include <time.h>
 
 #define RAIZ 0
-#define AMOSTRAS_CHECKPOINT 100 /* envia ao vizinho a cada 100 amostras */
-#define BLOCOS_POR_PEGADA 1000  /* trabalho pego por thread: 1000 x 100 */
-#define LOTES_GPU 64            /* parcela do processo dividida em lotes */
+#define AMOSTRAS_CHECKPOINT 100
+#define BLOCOS_POR_PEGADA 1000
+#define LOTES_GPU 64
 #define TAG_BACKUP 77
-#define PAUSA_COMUNICACAO_NS 20000 /* intervalo entre verificacoes (20 us) */
+#define PAUSA_COMUNICACAO_NS 20000
 
 #define A_INTERVALO 0.0
 #define B_INTERVALO 1.0
 #define VALOR_EXATO 3.14159265358979323846
 
-/* Numeros de trapezios testados */
 static const size_t quantidades[] = {1000000, 10000000, 100000000,
                                      1000000000};
 static const size_t total_quantidades =
@@ -57,19 +26,16 @@ static const size_t total_quantidades =
 static inline double f(double x) { return 4.0 / (1.0 + x * x); }
 #pragma omp end declare target
 
-/* Slot de progresso de cada thread, alinhado para evitar falso
- * compartilhamento entre threads */
 typedef struct {
     double soma;
     long long amostras;
     char preenchimento[64 - sizeof(double) - sizeof(long long)];
 } Progresso;
 
-/* Mensagem de backup enviada ao vizinho */
 typedef struct {
-    double soma;      /* soma parcial ate o momento */
-    double amostras;  /* amostras ja processadas */
-    double final;     /* 1.0 na ultima mensagem */
+    double soma;
+    double amostras;
+    double final;
 } Backup;
 
 typedef enum { MODO_CPU, MODO_CPU_SEM_BACKUP, MODO_GPU } Modo;
@@ -84,10 +50,6 @@ static const char *nome_modo(Modo m)
     return "?";
 }
 
-/* --------------------------------------------------
- * Deteccao da GPU: existe dispositivo E o codigo realmente
- * executa nele (nao no host, como fallback)?
- * -------------------------------------------------- */
 static int gpu_disponivel(void)
 {
     if (omp_get_num_devices() <= 0) return 0;
@@ -99,7 +61,6 @@ static int gpu_disponivel(void)
     return !no_host;
 }
 
-/* Soma dos trapezios [ini, fim) na CPU */
 static double soma_trapezios(size_t ini, size_t fim, double h)
 {
     double s = 0.0;
@@ -110,7 +71,6 @@ static double soma_trapezios(size_t ini, size_t fim, double h)
     return s;
 }
 
-/* Soma dos trapezios [ini, fim) na GPU */
 static double soma_trapezios_gpu(size_t ini, size_t fim, double h)
 {
     double s = 0.0;
@@ -128,13 +88,10 @@ typedef struct {
     double tempo_calculo;
     long long mensagens_enviadas;
     long long mensagens_recebidas;
-    double backup_soma;     /* ultimo valor recebido do vizinho */
+    double backup_soma;
     double backup_amostras;
 } ResultadoLocal;
 
-/* --------------------------------------------------
- * Calcula a parcela [ini, fim) do processo
- * -------------------------------------------------- */
 static ResultadoLocal calcula_parcela(size_t ini, size_t fim, double h,
                                       Modo modo, int rank, int processos,
                                       int threads)
@@ -147,11 +104,11 @@ static ResultadoLocal calcula_parcela(size_t ini, size_t fim, double h,
         (total_local + AMOSTRAS_CHECKPOINT - 1) / AMOSTRAS_CHECKPOINT;
 
     Progresso *progresso = calloc(threads, sizeof(Progresso));
-    size_t proxima_pegada = 0; /* contador compartilhado de trabalho */
+    size_t proxima_pegada = 0;
     int calculadoras_ativas = threads - 1;
 
-    int direita = (rank + 1) % processos;            /* para quem envio */
-    int esquerda = (rank - 1 + processos) % processos; /* de quem recebo */
+    int direita = (rank + 1) % processos;
+    int esquerda = (rank - 1 + processos) % processos;
 
     double t0 = MPI_Wtime();
 
@@ -160,13 +117,12 @@ static ResultadoLocal calcula_parcela(size_t ini, size_t fim, double h,
         int tid = omp_get_thread_num();
 
         if (tid != 0) {
-            /* ==================== THREADS DE CALCULO ==================== */
+
             double minha_soma = 0.0;
             long long minhas_amostras = 0;
 
             if (modo == MODO_GPU) {
-                /* Uma thread envia lotes para a GPU; ao fim de cada lote
-                 * publica o progresso, que a thread 0 repassa ao vizinho. */
+
                 if (tid == 1) {
                     size_t tam_lote = (total_local + LOTES_GPU - 1) / LOTES_GPU;
                     tam_lote = ((tam_lote + AMOSTRAS_CHECKPOINT - 1) /
@@ -184,8 +140,7 @@ static ResultadoLocal calcula_parcela(size_t ini, size_t fim, double h,
                     }
                 }
             } else {
-                /* CPU: distribuicao dinamica de "pegadas" de trabalho;
-                 * o progresso e publicado a cada bloco de 100 amostras. */
+
                 while (1) {
                     size_t pegada;
 #pragma omp atomic capture
@@ -211,10 +166,11 @@ static ResultadoLocal calcula_parcela(size_t ini, size_t fim, double h,
                 }
             }
 
-#pragma omp atomic update seq_cst
+#pragma omp flush
+#pragma omp atomic update
             calculadoras_ativas--;
         } else {
-            /* ================= THREAD 0: COMUNICACAO ================= */
+
             Backup envio, recebido;
             MPI_Request req_envio = MPI_REQUEST_NULL;
             long long ultimo_enviado = 0;
@@ -223,10 +179,10 @@ static ResultadoLocal calcula_parcela(size_t ini, size_t fim, double h,
 
             while (!enviou_final || !recebeu_final) {
                 int ativas;
-#pragma omp atomic read seq_cst
+#pragma omp atomic read
                 ativas = calculadoras_ativas;
+#pragma omp flush
 
-                /* Le o progresso de todas as threads de calculo */
                 double soma = 0.0;
                 long long amostras = 0;
                 for (int t = 1; t < threads; t++) {
@@ -241,7 +197,7 @@ static ResultadoLocal calcula_parcela(size_t ini, size_t fim, double h,
                 }
 
                 if (modo != MODO_CPU_SEM_BACKUP) {
-                    /* Envio: so quando o envio anterior ja terminou */
+
                     int livre = 1;
                     if (req_envio != MPI_REQUEST_NULL)
                         MPI_Test(&req_envio, &livre, MPI_STATUS_IGNORE);
@@ -251,15 +207,15 @@ static ResultadoLocal calcula_parcela(size_t ini, size_t fim, double h,
                         if (terminou ||
                             amostras - ultimo_enviado >= AMOSTRAS_CHECKPOINT) {
                             if (terminou) {
-                                /* releitura apos o fim: valor definitivo */
+
                                 soma = 0.0;
                                 amostras = 0;
                                 for (int t = 1; t < threads; t++) {
                                     double s;
                                     long long a;
-#pragma omp atomic read seq_cst
+#pragma omp atomic read
                                     s = progresso[t].soma;
-#pragma omp atomic read seq_cst
+#pragma omp atomic read
                                     a = progresso[t].amostras;
                                     soma += s;
                                     amostras += a;
@@ -276,7 +232,6 @@ static ResultadoLocal calcula_parcela(size_t ini, size_t fim, double h,
                         }
                     }
 
-                    /* Recebimento: guarda o ultimo valor do vizinho */
                     int chegou = 1;
                     while (chegou && !recebeu_final) {
                         MPI_Iprobe(esquerda, TAG_BACKUP, MPI_COMM_WORLD,
@@ -295,8 +250,6 @@ static ResultadoLocal calcula_parcela(size_t ini, size_t fim, double h,
                     break;
                 }
 
-                /* Pausa curta: evita que a thread de comunicacao dispute
-                 * o nucleo e as linhas de cache com as threads de calculo */
                 if (!enviou_final || !recebeu_final || ativas > 0) {
                     struct timespec pausa = {0, PAUSA_COMUNICACAO_NS};
                     nanosleep(&pausa, NULL);
@@ -332,14 +285,11 @@ int main(int argc, char *argv[])
         MPI_Abort(MPI_COMM_WORLD, 1);
     }
 
-    /* Rotulo opcional da execucao (ex.: "cpu", "gpu"), usado no nome do JSON */
     const char *rotulo = argc > 1 ? argv[1] : "";
 
-    /* Pelo menos 2 threads: 1 de comunicacao + 1 de calculo */
     int threads = omp_get_max_threads();
     if (threads < 2) threads = 2;
 
-    /* Deteccao automatica da GPU em cada processo */
     MPI_Comm comm_no;
     int rank_no;
     MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, rank,
@@ -412,7 +362,6 @@ int main(int argc, char *argv[])
                "erro rel", "backup");
     }
 
-    /* GPU so e usada se TODOS os processos tiverem uma */
     Modo modos[3] = {MODO_CPU, MODO_CPU_SEM_BACKUP, MODO_GPU};
     int total_modos = processos_com_gpu == processos ? 3 : 2;
 
@@ -422,7 +371,6 @@ int main(int argc, char *argv[])
         size_t n = quantidades[q];
         double h = (B_INTERVALO - A_INTERVALO) / (double)n;
 
-        /* Divisao em blocos contiguos (o resto vai para os primeiros) */
         size_t base = n / processos, resto = n % processos;
         size_t ini = rank * base + ((size_t)rank < resto ? (size_t)rank : resto);
         size_t fim = ini + base + ((size_t)rank < resto ? 1 : 0);
@@ -442,8 +390,6 @@ int main(int argc, char *argv[])
                        MPI_COMM_WORLD);
             double t2 = MPI_Wtime();
 
-            /* O backup guardado em cada processo deve coincidir com a
-             * soma final do vizinho da esquerda */
             double soma_esquerda = 0.0;
             int esquerda = (rank - 1 + processos) % processos;
             int direita = (rank + 1) % processos;

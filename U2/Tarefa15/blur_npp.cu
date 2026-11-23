@@ -1,19 +1,3 @@
-/*
- * Tarefa 15 - Borramento (box blur) de imagens com NPP
- *
- * Usa a funcao de filtro de media (box filter) da NVIDIA Performance
- * Primitives: nppiFilterBoxBorder_8u_C{1,3,4}R_Ctx, com mascara
- * (2*RAIO+1) x (2*RAIO+1) e ancora no centro.
- *
- * Observacao sobre bordas: a versao sequencial calcula a media apenas
- * dos vizinhos que existem (janela recortada). O NPP nao possui esse
- * modo; usamos NPP_BORDER_REPLICATE (replica o pixel da borda). Assim,
- * o resultado e identico (a menos de arredondamento) nos pixels internos
- * e difere apenas na faixa de RAIO pixels junto as bordas.
- *
- * compilar: nvcc -O2 blur_npp.cu -o blur_npp -lnppif -lnppc
- * executar: ./blur_npp entrada.jpg saida.jpg
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,10 +11,10 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-#define RAIO_BLUR 25  // Janela de 51x51 pixels (igual a versao sequencial)
+#define RAIO_BLUR 25
 #define REPETICOES 5
 #define AMOSTRAS_VERIFICACAO 2000
-#define TOLERANCIA 1  // diferenca de arredondamento aceita (NPP arredonda)
+#define TOLERANCIA 1
 
 #define ARQUIVO_JSON "resultados_npp.json"
 
@@ -54,9 +38,6 @@
         }                                                                \
     } while (0)
 
-/* --------------------------------------------------
- * Preenche o contexto de stream exigido pelas funcoes _Ctx do NPP
- * -------------------------------------------------- */
 static NppStreamContext cria_contexto_npp(cudaStream_t stream)
 {
     NppStreamContext ctx;
@@ -85,9 +66,6 @@ static NppStreamContext cria_contexto_npp(cudaStream_t stream)
     return ctx;
 }
 
-/* --------------------------------------------------
- * Chama o box filter do NPP de acordo com o numero de canais
- * -------------------------------------------------- */
 static void filtro_npp(const Npp8u *d_entrada, int passo_entrada,
                        Npp8u *d_saida, int passo_saida,
                        int largura, int altura, int canais,
@@ -123,9 +101,6 @@ static void filtro_npp(const Npp8u *d_entrada, int passo_entrada,
     }
 }
 
-/* --------------------------------------------------
- * Referencia sequencial para um unico pixel/canal
- * -------------------------------------------------- */
 static int media_referencia(const unsigned char *entrada, int x, int y, int c,
                             int largura, int altura, int canais)
 {
@@ -143,10 +118,6 @@ static int media_referencia(const unsigned char *entrada, int x, int y, int c,
     return (int)(soma / quantidade);
 }
 
-/* --------------------------------------------------
- * Verifica pixels internos sorteados (fora da faixa de borda),
- * onde NPP e a versao sequencial devem coincidir.
- * -------------------------------------------------- */
 static int verifica_amostras(const unsigned char *entrada,
                              const unsigned char *saida,
                              int largura, int altura, int canais,
@@ -208,7 +179,6 @@ int main(int argc, char *argv[])
     printf("Aplicando box filter NPP com mascara %dx%d...\n",
            2 * RAIO_BLUR + 1, 2 * RAIO_BLUR + 1);
 
-    /* Memoria com pitch (linhas alinhadas), recomendado pelo NPP */
     Npp8u *d_entrada = NULL, *d_saida = NULL;
     size_t passo_entrada = 0, passo_saida = 0;
 
@@ -225,7 +195,6 @@ int main(int argc, char *argv[])
     CUDA_CHECK(cudaEventCreate(&ini));
     CUDA_CHECK(cudaEventCreate(&fim));
 
-    /* ---------- Transferencia Host -> Device ---------- */
     float tempo_h2d_ms = 0.0f;
     CUDA_CHECK(cudaEventRecord(ini, stream));
     CUDA_CHECK(cudaMemcpy2DAsync(d_entrada, passo_entrada, imagem, passo_host,
@@ -235,12 +204,10 @@ int main(int argc, char *argv[])
     CUDA_CHECK(cudaEventSynchronize(fim));
     CUDA_CHECK(cudaEventElapsedTime(&tempo_h2d_ms, ini, fim));
 
-    /* ---------- Aquecimento ---------- */
     filtro_npp(d_entrada, (int)passo_entrada, d_saida, (int)passo_saida,
                largura, altura, canais, ctx);
     CUDA_CHECK(cudaStreamSynchronize(stream));
 
-    /* ---------- Filtro (REPETICOES vezes) ---------- */
     float soma_ms = 0.0f, min_ms = 1e30f, max_ms = 0.0f;
 
     for (int r = 0; r < REPETICOES; r++) {
@@ -258,7 +225,6 @@ int main(int argc, char *argv[])
 
     float media_ms = soma_ms / REPETICOES;
 
-    /* ---------- Transferencia Device -> Host ---------- */
     float tempo_d2h_ms = 0.0f;
     CUDA_CHECK(cudaEventRecord(ini, stream));
     CUDA_CHECK(cudaMemcpy2DAsync(resultado, passo_host, d_saida, passo_saida,

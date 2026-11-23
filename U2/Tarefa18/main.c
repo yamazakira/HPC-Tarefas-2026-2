@@ -1,21 +1,3 @@
-/*
- * Tarefa 18 - Escalonador dinamico Lider-Trabalhador (Master-Worker)
- *
- * Adaptacao do codigo de propagacao de onda 2D (Tarefas 12/13): cada fonte
- * sismica (tiro) e uma tarefa independente, processada por um trabalhador.
- *
- *  - Processo 0 (lider): distribui dinamicamente os tiros. Envia uma struct
- *    Tiro (tipo derivado MPI) a cada trabalhador livre; quando recebe a
- *    struct Resultado de um trabalhador, envia a proxima tarefa para ele.
- *  - Processos 1..P-1 (trabalhadores): recebem um Tiro, simulam a propagacao,
- *    salvam o sismograma e avisam o lider com um Resultado.
- *
- * O experimento e repetido para varias quantidades de fontes (lista de
- * size_t) e os tempos sao exportados em resultados_np<P>.json.
- *
- * compilar: mpicc -O2 main.c -o main -lm
- * executar: mpirun -np 3 ./main        (1 lider + pelo menos 2 trabalhadores)
- */
 #include <math.h>
 #include <mpi.h>
 #include <stddef.h>
@@ -34,7 +16,6 @@
 
 #define VELOCIDADE 2000.0
 
-/* Profundidade das fontes e da linha de receptores */
 #define SZ 50
 #define RZ 5
 
@@ -42,38 +23,29 @@
 
 #define LIDER 0
 
-/* So os primeiros tiros gravam o sismograma (evita centenas de MB em disco) */
 #define MAX_SISMOGRAMAS_SALVOS 16
 
-/* Tags das mensagens */
 #define TAG_TAREFA 1
 #define TAG_RESULTADO 2
 #define TAG_FIM 3
 
-/* Quantidades de fontes sismicas testadas */
 static const size_t quantidades_fontes[] = {1, 2, 4, 8, 16, 32, 64, 128};
 static const size_t total_experimentos =
     sizeof(quantidades_fontes) / sizeof(quantidades_fontes[0]);
 
-/* --------------------------------------------------
- * Structs trocadas entre lider e trabalhadores
- * -------------------------------------------------- */
 typedef struct {
-    int id; /* indice do tiro */
-    int sx; /* posicao x da fonte (indice da malha) */
-    int sz; /* posicao z da fonte (indice da malha) */
+    int id;
+    int sx;
+    int sz;
 } Tiro;
 
 typedef struct {
-    int id;           /* tiro processado */
-    int trabalhador;  /* rank que processou */
-    double tempo_s;   /* tempo de simulacao no trabalhador */
-    double amp_max;   /* maior amplitude registrada (verificacao) */
+    int id;
+    int trabalhador;
+    double tempo_s;
+    double amp_max;
 } Resultado;
 
-/* --------------------------------------------------
- * Tipos derivados MPI para as structs (MPI_Type_create_struct)
- * -------------------------------------------------- */
 static MPI_Datatype cria_tipo_tiro(void)
 {
     int blocos[3] = {1, 1, 1};
@@ -83,7 +55,7 @@ static MPI_Datatype cria_tipo_tiro(void)
 
     MPI_Datatype tmp, tipo;
     MPI_Type_create_struct(3, blocos, deslocamentos, tipos, &tmp);
-    /* garante que a extensao do tipo seja igual a sizeof(Tiro) */
+
     MPI_Type_create_resized(tmp, 0, sizeof(Tiro), &tipo);
     MPI_Type_commit(&tipo);
     MPI_Type_free(&tmp);
@@ -106,9 +78,6 @@ static MPI_Datatype cria_tipo_resultado(void)
     return tipo;
 }
 
-/* --------------------------------------------------
- * Fisica (igual as Tarefas 12/13)
- * -------------------------------------------------- */
 static double ricker(double t, double f0)
 {
     double t0 = 1.0 / f0;
@@ -120,13 +89,9 @@ static void inicializa_modelo(double *vel)
 {
     for (int iz = 0; iz < NZ; iz++)
         for (int ix = 0; ix < NX; ix++)
-            vel[iz * NX + ix] = VELOCIDADE; /* modelo homogeneo */
+            vel[iz * NX + ix] = VELOCIDADE;
 }
 
-/* --------------------------------------------------
- * Simula um tiro e grava o sismograma (NT x NX, float)
- * registrado por uma linha de receptores na profundidade RZ.
- * -------------------------------------------------- */
 static double processa_tiro(const Tiro *tiro, double *vel, double *u,
                             double *u_old, double *u_new, float *sismograma)
 {
@@ -156,24 +121,20 @@ static double processa_tiro(const Tiro *tiro, double *vel, double *u,
             }
         }
 
-        /* Injeta a fonte */
         u_new[source_id] += ricker(t, f0);
 
-        /* Registra a linha de receptores */
         for (int ix = 0; ix < NX; ix++) {
             double a = u_new[RZ * NX + ix];
             sismograma[(size_t)it * NX + ix] = (float)a;
             if (fabs(a) > amp_max) amp_max = fabs(a);
         }
 
-        /* Troca dos campos */
         double *tmp = u_old;
         u_old = u;
         u = u_new;
         u_new = tmp;
     }
 
-    /* Salva o sismograma do tiro */
     if (tiro->id >= MAX_SISMOGRAMAS_SALVOS) return amp_max;
 
     char nome[128];
@@ -187,10 +148,6 @@ static double processa_tiro(const Tiro *tiro, double *vel, double *u,
     return amp_max;
 }
 
-/* --------------------------------------------------
- * Trabalhador: espera tarefas do lider ate receber TAG_FIM.
- * Sempre: Recv (tarefa) -> processa -> Send (resultado).
- * -------------------------------------------------- */
 static void trabalhador(int rank, MPI_Datatype tipo_tiro,
                         MPI_Datatype tipo_resultado)
 {
@@ -231,14 +188,11 @@ static void trabalhador(int rank, MPI_Datatype tipo_tiro,
     free(sismograma);
 }
 
-/* --------------------------------------------------
- * Lider: um experimento com n_fontes tiros
- * -------------------------------------------------- */
 typedef struct {
     int trabalhador;
-    double inicio_s; /* envio da tarefa, relativo ao inicio do experimento */
-    double fim_s;    /* recebimento do resultado */
-    double tempo_s;  /* tempo de simulacao medido no trabalhador */
+    double inicio_s;
+    double fim_s;
+    double tempo_s;
     double amp_max;
 } RegistroTiro;
 
@@ -246,7 +200,7 @@ static Tiro monta_tiro(int id, int n_fontes)
 {
     Tiro t;
     t.id = id;
-    /* fontes espalhadas ao longo de x, na profundidade SZ */
+
     t.sx = n_fontes == 1 ? NX / 2 : 10 + id * (NX - 21) / (n_fontes - 1);
     t.sz = SZ;
     return t;
@@ -267,7 +221,6 @@ static void lider_experimento(int n_fontes, int processos,
 
     double t0 = MPI_Wtime();
 
-    /* 1) uma tarefa inicial para cada trabalhador (se houver) */
     for (int w = 1; w <= trabalhadores && proximo < n_fontes; w++) {
         Tiro tiro = monta_tiro(proximo, n_fontes);
         registros[proximo].trabalhador = w;
@@ -277,7 +230,6 @@ static void lider_experimento(int n_fontes, int processos,
         ativos++;
     }
 
-    /* 2) cada resultado libera o trabalhador para a proxima tarefa */
     while (ativos > 0) {
         Resultado r;
         MPI_Status status;
@@ -298,7 +250,7 @@ static void lider_experimento(int n_fontes, int processos,
             MPI_Send(&tiro, 1, tipo_tiro, w, TAG_TAREFA, MPI_COMM_WORLD);
             proximo++;
         } else {
-            ativos--; /* trabalhador fica ocioso, esperando o proximo lote */
+            ativos--;
         }
     }
 
@@ -401,7 +353,6 @@ int main(int argc, char *argv[])
         fprintf(json, "  ]\n}\n");
         fclose(json);
 
-        /* encerra todos os trabalhadores */
         Tiro vazio = {-1, 0, 0};
         for (int w = 1; w < processos; w++)
             MPI_Send(&vazio, 1, tipo_tiro, w, TAG_FIM, MPI_COMM_WORLD);

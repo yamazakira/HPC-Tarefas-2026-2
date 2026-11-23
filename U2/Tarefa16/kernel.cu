@@ -1,22 +1,3 @@
-/*
- * Tarefa 16 - Soma de vetores em CUDA com regra par/impar
- *
- *     C[i] = 2*A[i] + B[i]     para i par
- *     C[i] = A[i] + 3*B[i]     para i impar
- *
- * Pontos explorados:
- *   1. Configuracao de grid/bloco a partir das propriedades do dispositivo
- *      (numero de SMs, threads por SM, API de ocupacao do CUDA).
- *   2. Tamanhos pequenos, medios e grandes (lista de size_t).
- *   3. Tempos de varias configuracoes x tamanhos (cudaEvent).
- *   4. Ocupacao teorica de cada configuracao exportada para analise.
- *
- * Tambem compara a versao com desvio (if/else -> divergencia de warp)
- * com a versao sem desvio (branch-free, apenas aritmetica).
- *
- * compilar: nvcc -O2 kernel.cu -o kernel
- * executar: ./kernel   (gera resultados_cuda.json)
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -35,20 +16,18 @@
         }                                                                \
     } while (0)
 
-/* Tamanhos dos vetores: pequenos, medios e grandes */
 static const size_t tamanhos[] = {
-    1000,                 /* pequeno */
-    10000,                /* pequeno */
-    100000,               /* medio   */
-    1000000,              /* medio   */
-    10000000,             /* grande  */
-    100000000,            /* grande  */
-    250000000,            /* grande  (3 vetores float = 3 GB) */
+    1000,
+    10000,
+    100000,
+    1000000,
+    10000000,
+    100000000,
+    250000000,
 };
 static const size_t quantidade_tamanhos =
     sizeof(tamanhos) / sizeof(tamanhos[0]);
 
-/* Tamanhos de bloco testados (multiplos do tamanho do warp) */
 static const int blocos_testados[] = {32, 64, 128, 256, 512, 1024};
 static const size_t quantidade_blocos =
     sizeof(blocos_testados) / sizeof(blocos_testados[0]);
@@ -60,13 +39,6 @@ static const char *classe_tamanho(size_t n)
     return "grande";
 }
 
-/* --------------------------------------------------
- * Kernel COM desvio: if/else dependente da paridade.
- * Em um warp, threads pares e impares seguem caminhos
- * diferentes (divergencia), a menos que o compilador
- * converta o desvio em predicacao.
- * Usa grid-stride loop: funciona com qualquer tamanho de grid.
- * -------------------------------------------------- */
 __global__ void soma_divergente(const float *__restrict__ A,
                                 const float *__restrict__ B,
                                 float *__restrict__ C, size_t n)
@@ -83,12 +55,6 @@ __global__ void soma_divergente(const float *__restrict__ A,
     }
 }
 
-/* --------------------------------------------------
- * Kernel SEM desvio (branch-free): os coeficientes sao
- * calculados a partir do bit menos significativo de i.
- *   par   (impar = 0): 2*A + 1*B
- *   impar (impar = 1): 1*A + 3*B
- * -------------------------------------------------- */
 __global__ void soma_sem_desvio(const float *__restrict__ A,
                                 const float *__restrict__ B,
                                 float *__restrict__ C, size_t n)
@@ -102,9 +68,6 @@ __global__ void soma_sem_desvio(const float *__restrict__ A,
     }
 }
 
-/* --------------------------------------------------
- * Versao sequencial na CPU (referencia e comparacao)
- * -------------------------------------------------- */
 static void soma_cpu(const float *A, const float *B, float *C, size_t n)
 {
     for (size_t i = 0; i < n; i++) {
@@ -135,14 +98,11 @@ static size_t verifica(const float *ref, const float *gpu, size_t n)
 
 typedef void (*KernelSoma)(const float *, const float *, float *, size_t);
 
-/* --------------------------------------------------
- * Executa um kernel REPETICOES vezes e devolve o tempo medio (ms)
- * -------------------------------------------------- */
 static float mede_kernel(KernelSoma kernel, int grid, int bloco,
                          const float *dA, const float *dB, float *dC,
                          size_t n, cudaEvent_t ini, cudaEvent_t fim)
 {
-    /* aquecimento */
+
     kernel<<<grid, bloco>>>(dA, dB, dC, n);
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
@@ -160,7 +120,6 @@ static float mede_kernel(KernelSoma kernel, int grid, int bloco,
     return soma / REPETICOES;
 }
 
-/* Ocupacao teorica (%) de um kernel com um dado tamanho de bloco */
 static double ocupacao_teorica(KernelSoma kernel, int bloco,
                                const cudaDeviceProp *prop, int *blocos_sm)
 {
@@ -175,7 +134,7 @@ static void escreve_registro(FILE *json, size_t n, const char *config,
                              const char *kernel, int bloco, int grid,
                              double ocupacao, float tempo_ms, size_t erros)
 {
-    double bytes = 3.0 * n * sizeof(float); /* le A e B, escreve C */
+    double bytes = 3.0 * n * sizeof(float);
     double banda = bytes / (tempo_ms * 1e-3) / 1e9;
 
     fprintf(json,
@@ -194,7 +153,7 @@ static void escreve_registro(FILE *json, size_t n, const char *config,
 
 int main(void)
 {
-    /* ---------- 1. Propriedades do dispositivo ---------- */
+
     int dispositivo = 0;
     cudaDeviceProp prop;
     CUDA_CHECK(cudaGetDevice(&dispositivo));
@@ -206,7 +165,6 @@ int main(void)
            prop.maxThreadsPerMultiProcessor, prop.maxThreadsPerBlock,
            prop.warpSize);
 
-    /* Tamanho de bloco sugerido pela API de ocupacao */
     int grid_min = 0, bloco_ocupacao = 0;
     CUDA_CHECK(cudaOccupancyMaxPotentialBlockSize(
         &grid_min, &bloco_ocupacao, soma_sem_desvio, 0, 0));
@@ -215,7 +173,6 @@ int main(void)
     double ocup_api = ocupacao_teorica(soma_sem_desvio, bloco_ocupacao,
                                        &prop, &blocos_sm_ocupacao);
 
-    /* Grid "persistente": exatamente quantos blocos cabem ativos na GPU */
     int grid_dispositivo = prop.multiProcessorCount * blocos_sm_ocupacao;
 
     printf("API de ocupacao: bloco = %d, blocos ativos/SM = %d "
@@ -223,7 +180,6 @@ int main(void)
            bloco_ocupacao, blocos_sm_ocupacao, ocup_api, grid_dispositivo,
            prop.multiProcessorCount, blocos_sm_ocupacao);
 
-    /* ---------- Alocacao para o maior tamanho ---------- */
     size_t n_max = 0;
     for (size_t t = 0; t < quantidade_tamanhos; t++)
         if (tamanhos[t] > n_max) n_max = tamanhos[t];
@@ -231,7 +187,7 @@ int main(void)
     size_t bytes_max = n_max * sizeof(float);
 
     float *hA, *hB, *hC, *hRef;
-    CUDA_CHECK(cudaMallocHost(&hA, bytes_max)); /* memoria "pinned" */
+    CUDA_CHECK(cudaMallocHost(&hA, bytes_max));
     CUDA_CHECK(cudaMallocHost(&hB, bytes_max));
     CUDA_CHECK(cudaMallocHost(&hC, bytes_max));
     hRef = (float *)malloc(bytes_max);
@@ -275,7 +231,6 @@ int main(void)
     fprintf(json, "  \"ocupacao_api_pct\": %.2f,\n", ocup_api);
     fprintf(json, "  \"repeticoes\": %d,\n", REPETICOES);
 
-    /* Tempos de CPU e de transferencia, por tamanho */
     fprintf(json, "  \"base\": [\n");
 
     for (size_t t = 0; t < quantidade_tamanhos; t++) {
@@ -308,7 +263,6 @@ int main(void)
     }
     fprintf(json, "  ],\n");
 
-    /* ---------- Experimentos ---------- */
     fprintf(json, "  \"resultados\": [\n");
 
     for (size_t t = 0; t < quantidade_tamanhos; t++) {
@@ -321,7 +275,6 @@ int main(void)
         CUDA_CHECK(cudaMemcpy(dA, hA, bytes, cudaMemcpyHostToDevice));
         CUDA_CHECK(cudaMemcpy(dB, hB, bytes, cudaMemcpyHostToDevice));
 
-        /* (a) Uma thread por elemento, variando o tamanho do bloco */
         for (size_t b = 0; b < quantidade_blocos; b++) {
             int bloco = blocos_testados[b];
             int grid = (int)((n + bloco - 1) / bloco);
@@ -344,11 +297,6 @@ int main(void)
             }
         }
 
-        /* (b) Configuracao baseada nas propriedades do dispositivo:
-         *     bloco da API de ocupacao + grid = SMs x blocos ativos/SM,
-         *     com grid-stride loop (cada thread processa varios elementos).
-         *     Para N pequeno, nao faz sentido lancar mais blocos que o
-         *     necessario, entao limitamos a ceil(N / bloco). */
         {
             int bloco = bloco_ocupacao;
             int grid_necessario = (int)((n + bloco - 1) / bloco);
@@ -372,8 +320,6 @@ int main(void)
             }
         }
 
-        /* (c) Grid subdimensionada: apenas 1 bloco por SM
-         *     (mostra o efeito de baixa ocupacao) */
         {
             int bloco = 256;
             int grid = prop.multiProcessorCount;

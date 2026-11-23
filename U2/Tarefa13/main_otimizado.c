@@ -180,23 +180,48 @@ static double simula(void)
          * ---------------------------------------------
          */
 
-#pragma omp target teams distribute parallel for collapse(2) if(usa_gpu)
-        for (int iz = 1; iz < NZ - 1; iz++)
+        if (usa_gpu)
         {
-
-            for (int ix = 1; ix < NX - 1; ix++)
+#pragma omp target teams distribute parallel for collapse(2)
+            for (int iz = 1; iz < NZ - 1; iz++)
             {
 
-                int id = iz * NX + ix;
+                for (int ix = 1; ix < NX - 1; ix++)
+                {
 
-                double d2udx2 =
-                    (u[id + 1] - 2.0 * u[id] + u[id - 1]) / (DX * DX);
+                    int id = iz * NX + ix;
 
-                double d2udz2 =
-                    (u[id + NX] - 2.0 * u[id] + u[id - NX]) / (DZ * DZ);
+                    double d2udx2 =
+                        (u[id + 1] - 2.0 * u[id] + u[id - 1]) / (DX * DX);
 
-                u_new[id] =
-                    2.0 * u[id] - u_old[id] + vel[id] * vel[id] * dt2 * (d2udx2 + d2udz2);
+                    double d2udz2 =
+                        (u[id + NX] - 2.0 * u[id] + u[id - NX]) / (DZ * DZ);
+
+                    u_new[id] =
+                        2.0 * u[id] - u_old[id] + vel[id] * vel[id] * dt2 * (d2udx2 + d2udz2);
+                }
+            }
+        }
+        else
+        {
+#pragma omp parallel for collapse(2)
+            for (int iz = 1; iz < NZ - 1; iz++)
+            {
+
+                for (int ix = 1; ix < NX - 1; ix++)
+                {
+
+                    int id = iz * NX + ix;
+
+                    double d2udx2 =
+                        (u[id + 1] - 2.0 * u[id] + u[id - 1]) / (DX * DX);
+
+                    double d2udz2 =
+                        (u[id + NX] - 2.0 * u[id] + u[id - NX]) / (DZ * DZ);
+
+                    u_new[id] =
+                        2.0 * u[id] - u_old[id] + vel[id] * vel[id] * dt2 * (d2udx2 + d2udz2);
+                }
             }
         }
 
@@ -348,6 +373,8 @@ int main(int argc, char *argv[])
                     primeiro ? "" : ",\n", NX, NZ, modos[m], usa_gpu ? "gpu" : "cpu",
                     tempo, tempo_h2d, tempo_d2h, soma_receptor);
             primeiro = 0;
+            fflush(saida);
+            fflush(stdout);
         }
     }
 

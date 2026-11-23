@@ -307,6 +307,8 @@ int main(int argc, char *argv[])
                 "    {\"nx\": %d, \"nz\": %d, \"modo\": \"gpu_map\", \"tempo_total_s\": %.6f, "
                 "\"soma_receptor\": %.10e}%s\n",
                 NX, NZ, tempo, soma_receptor, i + 1 < NUM_TAMANHOS ? "," : "");
+        fflush(saida);
+        fflush(stdout);
     }
 
     fprintf(saida, "  ]\n}\n");

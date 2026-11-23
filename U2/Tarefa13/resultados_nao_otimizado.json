@@ -1,13 +1,13 @@
 {
   "versao": "nao_otimizado",
-  "dispositivos": 0,
-  "threads": 4,
+  "dispositivos": 1,
+  "threads": 16,
   "nt": 1000,
   "resultados": [
-    {"nx": 200, "nz": 100, "modo": "gpu_map", "tempo_total_s": 0.283136, "soma_receptor": 1.2026621084e+02},
-    {"nx": 400, "nz": 200, "modo": "gpu_map", "tempo_total_s": 0.405449, "soma_receptor": 5.5874637698e+01},
-    {"nx": 800, "nz": 400, "modo": "gpu_map", "tempo_total_s": 1.220417, "soma_receptor": 5.5874637698e+01},
-    {"nx": 1600, "nz": 800, "modo": "gpu_map", "tempo_total_s": 4.493037, "soma_receptor": 5.5874637698e+01},
-    {"nx": 3200, "nz": 1600, "modo": "gpu_map", "tempo_total_s": 15.704721, "soma_receptor": 5.5874637698e+01}
+    {"nx": 200, "nz": 100, "modo": "gpu_map", "tempo_total_s": 0.095964, "soma_receptor": 1.2026621084e+02},
+    {"nx": 400, "nz": 200, "modo": "gpu_map", "tempo_total_s": 0.253970, "soma_receptor": 5.5874637698e+01},
+    {"nx": 800, "nz": 400, "modo": "gpu_map", "tempo_total_s": 0.918443, "soma_receptor": 5.5874637698e+01},
+    {"nx": 1600, "nz": 800, "modo": "gpu_map", "tempo_total_s": 3.713366, "soma_receptor": 5.5874637698e+01},
+    {"nx": 3200, "nz": 1600, "modo": "gpu_map", "tempo_total_s": 16.121878, "soma_receptor": 5.5874637698e+01}
   ]
 }

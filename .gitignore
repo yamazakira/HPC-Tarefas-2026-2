@@ -68,3 +68,7 @@ dkms.conf
 **.log
 **.pdf
 **.synctex.gz
+
+**/*.out
+**/*.err
+**/*.zip

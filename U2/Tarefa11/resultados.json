@@ -1,12 +1,12 @@
 {
-  "dispositivos": 0,
-  "threads": 4,
+  "dispositivos": 1,
+  "threads": 16,
   "resultados": [
-    {"tamanho": 1000, "cpu_s": 0.0000031480, "gpu_total_s": 0.0004630010, "gpu_kernel_s": 0.0002118080, "gpu_transferencia_s": 0.0000011480},
-    {"tamanho": 10000, "cpu_s": 0.0000046320, "gpu_total_s": 0.0002979240, "gpu_kernel_s": 0.0002089740, "gpu_transferencia_s": 0.0000004180},
-    {"tamanho": 100000, "cpu_s": 0.0000309100, "gpu_total_s": 0.0003329570, "gpu_kernel_s": 0.0003071510, "gpu_transferencia_s": 0.0000004020},
-    {"tamanho": 1000000, "cpu_s": 0.0015195930, "gpu_total_s": 0.0015100920, "gpu_kernel_s": 0.0014403770, "gpu_transferencia_s": 0.0000020150},
-    {"tamanho": 10000000, "cpu_s": 0.0138545030, "gpu_total_s": 0.0119885170, "gpu_kernel_s": 0.0127952880, "gpu_transferencia_s": 0.0000018530},
-    {"tamanho": 100000000, "cpu_s": 0.1182569060, "gpu_total_s": 0.1162723160, "gpu_kernel_s": 0.1157408880, "gpu_transferencia_s": 0.0000014540}
+    {"tamanho": 1000, "cpu_s": 0.0080380440, "gpu_total_s": 0.0001959801, "gpu_kernel_s": 0.0000150204, "gpu_transferencia_s": 0.0000319481},
+    {"tamanho": 10000, "cpu_s": 0.0000238419, "gpu_total_s": 0.0000941753, "gpu_kernel_s": 0.0000119209, "gpu_transferencia_s": 0.0000462532},
+    {"tamanho": 100000, "cpu_s": 0.0000321865, "gpu_total_s": 0.0004479885, "gpu_kernel_s": 0.0000140667, "gpu_transferencia_s": 0.0002357960},
+    {"tamanho": 1000000, "cpu_s": 0.0002560616, "gpu_total_s": 0.0016400814, "gpu_kernel_s": 0.0000200272, "gpu_transferencia_s": 0.0009498596},
+    {"tamanho": 10000000, "cpu_s": 0.0028741360, "gpu_total_s": 0.0144431591, "gpu_kernel_s": 0.0001239777, "gpu_transferencia_s": 0.0129828453},
+    {"tamanho": 100000000, "cpu_s": 0.0277259350, "gpu_total_s": 0.1076300144, "gpu_kernel_s": 0.0010108948, "gpu_transferencia_s": 0.0955631733}
   ]
 }

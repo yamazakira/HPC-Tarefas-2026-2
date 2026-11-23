@@ -4,11 +4,35 @@ PYTHON ?= python
 OFFLOAD ?=
 THREADS12 ?= 1 2 4 8
 
+# Alvo do OpenMP offloading nas tarefas 11 e 13 (o codigo e o mesmo):
+#   make tarefa11               -> CPU (offload cai para o host)
+#   make tarefa11 GPU=intel     -> GPU integrada Intel (oneAPI icx)
+#   make tarefa11 GPU=nvidia    -> GPU NVIDIA (NVHPC nvc)
+#   make tarefa11 GPU=gcc-nvptx -> GPU NVIDIA (GCC com nvptx)
+GPU ?=
+ifeq ($(GPU),intel)
+GPUCC = icx
+GPUFLAGS = -fiopenmp -fopenmp-targets=spir64
+GPURUN = OMP_TARGET_OFFLOAD=MANDATORY
+else ifeq ($(GPU),nvidia)
+GPUCC = nvc
+GPUFLAGS = -mp=gpu
+GPURUN = OMP_TARGET_OFFLOAD=MANDATORY
+else ifeq ($(GPU),gcc-nvptx)
+GPUCC = gcc
+GPUFLAGS = -fopenmp -foffload=nvptx-none -fno-stack-protector
+GPURUN = OMP_TARGET_OFFLOAD=MANDATORY
+else
+GPUCC = $(CC)
+GPUFLAGS = -fopenmp $(OFFLOAD)
+GPURUN =
+endif
+
 build11:
-	cd Tarefa11 && mkdir -p outputs && $(CC) -O2 -fopenmp $(OFFLOAD) main.c -o outputs/main
+	cd Tarefa11 && mkdir -p outputs && $(GPUCC) -O2 $(GPUFLAGS) main.c -o outputs/main
 
 run11:
-	cd Tarefa11 && ./outputs/main
+	cd Tarefa11 && $(GPURUN) ./outputs/main
 
 plot11:
 	cd Tarefa11 && $(PYTHON) plot.py
@@ -34,11 +58,11 @@ npad12:
 
 build13:
 	cd Tarefa13 && mkdir -p outputs && \
-	$(CC) -O2 -fopenmp $(OFFLOAD) main.c -o outputs/main -lm && \
-	$(CC) -O2 -fopenmp $(OFFLOAD) main_otimizado.c -o outputs/main_otimizado -lm
+	$(GPUCC) -O2 $(GPUFLAGS) main.c -o outputs/main -lm && \
+	$(GPUCC) -O2 $(GPUFLAGS) main_otimizado.c -o outputs/main_otimizado -lm
 
 run13:
-	cd Tarefa13 && ./outputs/main && ./outputs/main_otimizado
+	cd Tarefa13 && $(GPURUN) ./outputs/main && $(GPURUN) ./outputs/main_otimizado
 
 plot13:
 	cd Tarefa13 && $(PYTHON) plot.py

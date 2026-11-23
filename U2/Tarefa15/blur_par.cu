@@ -1,17 +1,3 @@
-/*
- * Tarefa 15 - Borramento (box blur) de imagens em CUDA
- *
- * Versao paralela que explora grids multidimensionais:
- *   - GRID 1D : um indice linear por pixel (referencia para comparacao)
- *   - GRID 2D : threads mapeadas diretamente em (x, y) da imagem
- *   - GRID 3D : (x, y) da imagem + canal de cor no eixo z da grid
- *
- * Para cada configuracao de bloco o kernel e executado REPETICOES vezes
- * e os tempos (medidos com cudaEvent) sao exportados em JSON.
- *
- * compilar: nvcc -O2 blur_par.cu -o blur_par
- * executar: ./blur_par entrada.jpg saida.jpg
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,7 +8,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-#define RAIO_BLUR 25  // Janela de 51x51 pixels (igual a versao sequencial)
+#define RAIO_BLUR 25
 #define REPETICOES 5
 #define AMOSTRAS_VERIFICACAO 2000
 
@@ -38,9 +24,6 @@
         }                                                                \
     } while (0)
 
-/* --------------------------------------------------
- * Configuracoes de grid/bloco testadas
- * -------------------------------------------------- */
 typedef enum { GRID_1D = 1, GRID_2D = 2, GRID_3D = 3 } TipoGrid;
 
 typedef struct {
@@ -67,11 +50,6 @@ static const Configuracao configuracoes[] = {
 static const size_t quantidade_configuracoes =
     sizeof(configuracoes) / sizeof(configuracoes[0]);
 
-/* --------------------------------------------------
- * Calcula a media da vizinhanca de um pixel/canal.
- * Os limites da janela sao recortados na borda da imagem,
- * o que equivale ao "if" da versao sequencial.
- * -------------------------------------------------- */
 __host__ __device__ inline unsigned char media_vizinhanca(
     const unsigned char *entrada, int x, int y, int c,
     int largura, int altura, int canais)
@@ -93,10 +71,6 @@ __host__ __device__ inline unsigned char media_vizinhanca(
     return (unsigned char)(soma / quantidade);
 }
 
-/* --------------------------------------------------
- * GRID 1D: cada thread recebe um indice linear de pixel
- * e precisa reconstruir (x, y) com divisao/modulo.
- * -------------------------------------------------- */
 __global__ void blur_kernel_1d(const unsigned char *entrada,
                                unsigned char *saida,
                                int largura, int altura, int canais)
@@ -115,10 +89,6 @@ __global__ void blur_kernel_1d(const unsigned char *entrada,
     }
 }
 
-/* --------------------------------------------------
- * GRID 2D: o par (blockIdx, threadIdx) em x e y corresponde
- * diretamente a coluna e linha do pixel.
- * -------------------------------------------------- */
 __global__ void blur_kernel_2d(const unsigned char *entrada,
                                unsigned char *saida,
                                int largura, int altura, int canais)
@@ -136,10 +106,6 @@ __global__ void blur_kernel_2d(const unsigned char *entrada,
     }
 }
 
-/* --------------------------------------------------
- * GRID 3D: alem de (x, y), o eixo z da grid indexa o canal.
- * Cada thread calcula um unico valor (pixel, canal).
- * -------------------------------------------------- */
 __global__ void blur_kernel_3d(const unsigned char *entrada,
                                unsigned char *saida,
                                int largura, int altura, int canais)
@@ -156,9 +122,6 @@ __global__ void blur_kernel_3d(const unsigned char *entrada,
         media_vizinhanca(entrada, x, y, c, largura, altura, canais);
 }
 
-/* --------------------------------------------------
- * Monta a grid de acordo com o tipo e lanca o kernel
- * -------------------------------------------------- */
 static void monta_grid(const Configuracao *cfg, int largura, int altura,
                        int canais, dim3 *grid, dim3 *bloco)
 {
@@ -195,11 +158,6 @@ static void lanca_kernel(const Configuracao *cfg, dim3 grid, dim3 bloco,
     }
 }
 
-/* --------------------------------------------------
- * Verifica o resultado da GPU contra a referencia sequencial
- * em pixels sorteados (a versao sequencial completa e lenta).
- * Retorna o numero de divergencias.
- * -------------------------------------------------- */
 static int verifica_amostras(const unsigned char *entrada,
                              const unsigned char *saida_gpu,
                              int largura, int altura, int canais)
@@ -273,7 +231,6 @@ int main(int argc, char *argv[])
     CUDA_CHECK(cudaEventCreate(&ini));
     CUDA_CHECK(cudaEventCreate(&fim));
 
-    /* ---------- Transferencia Host -> Device ---------- */
     float tempo_h2d_ms = 0.0f;
     CUDA_CHECK(cudaEventRecord(ini));
     CUDA_CHECK(cudaMemcpy(d_entrada, imagem, tamanho, cudaMemcpyHostToDevice));
@@ -281,7 +238,6 @@ int main(int argc, char *argv[])
     CUDA_CHECK(cudaEventSynchronize(fim));
     CUDA_CHECK(cudaEventElapsedTime(&tempo_h2d_ms, ini, fim));
 
-    /* ---------- Aquecimento (inicializacao do contexto/kernel) ---------- */
     {
         dim3 grid, bloco;
         Configuracao aquecimento = {GRID_2D, 16, 16};
@@ -339,7 +295,6 @@ int main(int argc, char *argv[])
 
         float media_ms = soma_ms / REPETICOES;
 
-        /* ---------- Transferencia Device -> Host ---------- */
         float ms_d2h = 0.0f;
         CUDA_CHECK(cudaEventRecord(ini));
         CUDA_CHECK(cudaMemcpy(resultado, d_saida, tamanho,
@@ -352,7 +307,6 @@ int main(int argc, char *argv[])
         int erros = verifica_amostras(imagem, resultado,
                                       largura, altura, canais);
 
-        /* Threads lancadas x threads uteis (desperdicio nas bordas) */
         unsigned long long threads_lancadas =
             (unsigned long long)grid.x * grid.y * grid.z *
             bloco.x * bloco.y * bloco.z;
@@ -398,7 +352,6 @@ int main(int argc, char *argv[])
 
     printf("Resultados salvos em %s\n", ARQUIVO_JSON);
 
-    /* Salva a imagem gerada pela configuracao 2D 16x16 */
     {
         dim3 grid, bloco;
         Configuracao cfg = {GRID_2D, 16, 16};

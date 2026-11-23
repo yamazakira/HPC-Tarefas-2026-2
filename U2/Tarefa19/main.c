@@ -1,21 +1,3 @@
-/*
- * Tarefa 19 - Produto matriz-vetor y = A.x em memoria distribuida (MPI)
- *
- *  - A (M x N) e dividida por blocos de linhas com MPI_Scatter
- *  - x (N) e enviado inteiro a todos com MPI_Bcast
- *  - cada processo calcula suas linhas de y e o resultado volta ao
- *    processo 0 com MPI_Gather
- *
- * Para varios tamanhos de matriz (lista de size_t) mede o tempo de cada
- * fase (Scatter, Bcast, calculo, Gather) e o tempo sequencial de
- * referencia no processo 0, exportando resultados_np<P>.json.
- *
- * Se M nao for multiplo de P, a matriz e completada com linhas de zeros
- * (MPI_Scatter exige o mesmo numero de elementos por processo).
- *
- * compilar: mpicc -O2 main.c -o main
- * executar: mpirun -np 4 ./main [tamanho_maximo]
- */
 #include <math.h>
 #include <mpi.h>
 #include <stdio.h>
@@ -25,12 +7,10 @@
 #define RAIZ 0
 #define REPETICOES 5
 
-/* Matrizes quadradas M = N */
 static const size_t tamanhos[] = {1000, 2000, 4000, 8000, 12000, 16000};
 static const size_t quantidade_tamanhos =
     sizeof(tamanhos) / sizeof(tamanhos[0]);
 
-/* Valores deterministicos para A e x */
 static inline double valor_a(size_t i, size_t j)
 {
     return (double)((i * 7 + j * 3) % 17) * 0.125;
@@ -38,7 +18,6 @@ static inline double valor_a(size_t i, size_t j)
 
 static inline double valor_x(size_t j) { return 1.0 / (double)(j % 100 + 1); }
 
-/* y = A.x para `linhas` linhas consecutivas */
 static void matvec(const double *A, const double *x, double *y, size_t linhas,
                    size_t n)
 {
@@ -58,10 +37,8 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &processos);
 
-    /* argumento opcional: limita o maior tamanho (ex.: testes locais) */
     size_t limite = argc > 1 ? (size_t)atol(argv[1]) : (size_t)-1;
 
-    /* quantos nos distintos participam */
     char no[MPI_MAX_PROCESSOR_NAME];
     int tam_nome;
     memset(no, 0, sizeof(no));
@@ -120,7 +97,7 @@ int main(int argc, char *argv[])
         double *y_local = malloc(linhas_local * sizeof(double));
 
         if (rank == RAIZ) {
-            A = calloc(m_pad * n, sizeof(double)); /* linhas extras = 0 */
+            A = calloc(m_pad * n, sizeof(double));
             y = malloc(m_pad * sizeof(double));
             y_seq = malloc(m * sizeof(double));
             if (!A || !y || !y_seq) {
@@ -136,7 +113,6 @@ int main(int argc, char *argv[])
             MPI_Abort(MPI_COMM_WORLD, 1);
         }
 
-        /* Referencia sequencial no processo 0 */
         double tempo_seq = 0.0;
         if (rank == RAIZ) {
             for (int r = 0; r < REPETICOES; r++) {
@@ -154,25 +130,20 @@ int main(int argc, char *argv[])
             MPI_Barrier(MPI_COMM_WORLD);
             double t0 = MPI_Wtime();
 
-            /* 1) Distribui blocos de linhas de A */
             MPI_Scatter(A, contagem, MPI_DOUBLE, A_local, contagem,
                         MPI_DOUBLE, RAIZ, MPI_COMM_WORLD);
             double t1 = MPI_Wtime();
 
-            /* 2) Todos recebem o vetor x inteiro */
             MPI_Bcast(x, (int)n, MPI_DOUBLE, RAIZ, MPI_COMM_WORLD);
             double t2 = MPI_Wtime();
 
-            /* 3) Calculo local */
             matvec(A_local, x, y_local, linhas_local, n);
             double t3 = MPI_Wtime();
 
-            /* 4) Junta y no processo 0 */
             MPI_Gather(y_local, (int)linhas_local, MPI_DOUBLE, y,
                        (int)linhas_local, MPI_DOUBLE, RAIZ, MPI_COMM_WORLD);
             double t4 = MPI_Wtime();
 
-            /* Tempo de cada fase = o do processo mais lento */
             double locais[5] = {t1 - t0, t2 - t1, t3 - t2, t4 - t3, t4 - t0};
             double maximos[5];
             MPI_Reduce(locais, maximos, 5, MPI_DOUBLE, MPI_MAX, RAIZ,

@@ -1,24 +1,10 @@
-/*
- * Tarefa 17 - Ping-pong com MPI_Bsend (modo BUFFERIZADO)
- *
- * MPI_Bsend copia a mensagem para um buffer fornecido pelo USUARIO
- * (registrado com MPI_Buffer_attach) e retorna imediatamente, sem
- * depender do receptor. O envio real acontece depois, a partir desse
- * buffer. Vantagem: o emissor nunca bloqueia esperando o receptor.
- * Custo: uma copia extra de memoria (visivel em mensagens grandes) e a
- * necessidade de dimensionar o buffer (tamanho + MPI_BSEND_OVERHEAD
- * por mensagem pendente); se faltar espaco, o MPI_Bsend falha.
- *
- * compilar: mpicc -O2 pingpong_bsend.c -o pingpong_bsend
- * executar: mpirun -np 2 ./pingpong_bsend
- */
 #include "pingpong_comum.h"
 
 static void *buffer_bsend = NULL;
 
 static void prepara_modo(size_t maior_mensagem)
 {
-    /* Espaco para 2 mensagens pendentes do maior tamanho (folga) */
+
     int tamanho = (int)(2 * (maior_mensagem + MPI_BSEND_OVERHEAD));
     buffer_bsend = malloc(tamanho);
     if (buffer_bsend == NULL) {
@@ -32,7 +18,7 @@ static void encerra_modo(void)
 {
     void *endereco;
     int tamanho;
-    /* Bloqueia ate que todas as mensagens bufferizadas sejam enviadas */
+
     MPI_Buffer_detach(&endereco, &tamanho);
     free(buffer_bsend);
 }

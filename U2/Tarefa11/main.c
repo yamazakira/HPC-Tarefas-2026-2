@@ -73,13 +73,17 @@ double calcularCPU(Vetores *v, size_t tamanho)
 
 double calcularGPU(Vetores *v, size_t tamanho)
 {
+    float *A = v->A;
+    float *B = v->B;
+    float *C = v->C;
+
     double inicio = omp_get_wtime();
 
     #pragma omp target teams distribute parallel for \
-        map(to: v->B[0:tamanho], v->C[0:tamanho]) \
-        map(from: v->A[0:tamanho])
+        map(to: B[0:tamanho], C[0:tamanho]) \
+        map(from: A[0:tamanho])
     for (size_t i = 0; i < tamanho; i++) {
-        v->A[i] = v->B[i] + v->C[i];
+        A[i] = B[i] + C[i];
     }
 
     return omp_get_wtime() - inicio;

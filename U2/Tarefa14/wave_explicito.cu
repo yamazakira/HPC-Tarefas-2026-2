@@ -6,7 +6,7 @@
 static int NX = 200;
 static int NZ = 100;
 
-static const size_t tamanhos[] = {200, 400, 800, 1600, 3200};
+static const size_t tamanhos[] = {200, 400, 800, 1600, 3200, 6400, 12800};
 #define NUM_TAMANHOS (sizeof(tamanhos) / sizeof(tamanhos[0]))
 
 static int salvar_campo = 0;

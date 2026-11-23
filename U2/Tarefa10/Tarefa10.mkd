@@ -20,3 +20,17 @@ Pela classificação de flynn, a CPU se encaixa como MIMD, em que que cada core 
 A GPU utiliza a arquitetura gráfica Intel Gen9.5, associada à plataforma Kaby Lake (KBL GT2).
 
 Para essa máquina, a estratégia mais adequada é explorar paralelismo em threads e em instruções na CPU, e paralelismo de dados na GPU quando o problema tiver operações massivamente paralelas. O paralelismo entre processos também pode ser usado, mas tende a ter um custo maior de memória e comunicação.
+
+## Supercomputador NPAD
+
+O NPAD é um *cluster* heterogêneo de memória distribuída, formado por mais de 130 nós independentes, ligados por InfiniBand e gerenciados pelo SLURM. A rede é HDR de 100Gb/s nos nós AMD e nas GPUs mais novas, e FDR de 56Gb/s nos nós Intel e na V100. Pela classificação de Flynn, o conjunto é MIMD de memória distribuída. Já cada nó é um multiprocessador MIMD de memória compartilhada, com dois soquetes e acesso não uniforme à memória (NUMA).
+
+Os nós de CPU vão de 2 Xeon E5-2698v3 (32 núcleos, nas partições intel) a 2 EPYC 7713 (128 núcleos, na amd-512) e 2 EPYC 9654 (192 núcleos e 3TB de memória, na amd-3tb), com instruções vetoriais AVX2 ou AVX-512. Como aceleradores, há GPUs NVIDIA V100, A100, H100 e H200, de 4 a 8 por nó, e FPGAs Alveo U50. O armazenamento usa o sistema de arquivos paralelo BeeGFS.
+
+Com isso, é possível explorar paralelismo em vários níveis: vetorização em cada núcleo, threads dentro do nó, processos entre os nós e paralelismo de dados massivo nas GPUs. A estratégia mais adequada é a híbrida: MPI entre os nós e OpenMP dentro de cada nó, com afinidade de threads para respeitar a organização NUMA. Nas GPUs, usa-se CUDA ou OpenMP *offloading*, com um processo MPI por GPU.
+
+Essa escolha se justifica porque a memória não é compartilhada entre os nós, então só a troca de mensagens permite usar mais de um. Dentro do nó, as threads evitam cópias e mensagens desnecessárias. Já as GPUs só compensam em problemas grandes e quando os dados permanecem nelas, pois a transferência pelo barramento PCIe é cara. A partição também deve ser escolhida conforme o problema: a amd-512 para escalar em muitos nós, a amd-3tb para problemas que exigem muita memória e as partições de GPU, que têm apenas 1 ou 2 nós, para cálculos massivamente paralelos.
+
+## Comparação entre os ambientes
+
+A principal diferença entre os ambientes é a escala e a organização da memória. O notebook tem apenas 2 núcleos e uma GPU integrada que divide os mesmos 8GB com a CPU. Nele, OpenMP e vetorização são suficientes, e MPI serviria apenas para testes. No NPAD, o paralelismo é hierárquico, com nós, soquetes, núcleos e GPUs dedicadas, e o custo de comunicação entre os nós passa a fazer parte do projeto. Por isso, é necessário combinar MPI, OpenMP e GPU para aproveitar os recursos.
