@@ -2,11 +2,11 @@
 #SBATCH --job-name=MPI_OMP_trap_gpu_akira
 #SBATCH --output=saida_gpu%j.out
 #SBATCH --error=erro_gpu%j.err
-#SBATCH --partition=gpu-4-a100
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=2
+#SBATCH --partition=gpu-8-v100
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=8
-#SBATCH --gpus-per-node=2
+#SBATCH --gpus-per-node=1
 #SBATCH --time=0-0:20
 
 # --------------------------------------------------------------
@@ -29,7 +29,7 @@ export OMP_PROC_BIND=false
 
 MPIRUN_OPTS=""
 if mpirun --version 2>&1 | grep -qi "open mpi"; then
-    MPIRUN_OPTS="--bind-to none --mca btl ^openib"
+    MPIRUN_OPTS="--bind-to none --map-by node --mca btl ^openib"
 fi
 
 echo "===== Ambiente ====="
